@@ -1,0 +1,8 @@
+.banner-bg {
+  position: fixed;
+  height: 700px;
+top: -1px;
+  width: 120vw;
+  left: -120px;
+  background: url('../img/banner.png') center center/cover no-repeat;
+}

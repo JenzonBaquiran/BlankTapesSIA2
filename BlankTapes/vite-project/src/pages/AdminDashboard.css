@@ -1,0 +1,271 @@
+
+body, .admin-dashboard-container, .admin-dashboard-main, 
+.dashboard-title, .dashboard-cards, .dashboard-card, 
+.card-value, .card-label, .recent-orders-section, 
+.recent-orders-section h3, .orders-table, 
+.orders-table th, .orders-table td {
+  font-family: Arial, sans-serif !important;
+  color: #000 !important;
+}
+
+.admin-dashboard-main {
+  flex: 1;
+  padding: 50px 24px;
+  margin-left: 270px; 
+}
+
+.dashboard-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 24px;
+  color: #222b45;
+}
+
+.dashboard-cards {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.dashboard-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(16,30,54,0.06);
+  padding: 24px 32px;
+  display: flex;
+  align-items: center;
+  min-width: 220px;
+  flex: 1;
+  gap: 16px;
+}
+
+.dashboard-card .icon {
+  font-size: 2rem;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  margin-right: 12px;
+}
+
+.dashboard-card.users .icon {
+  background: #151515 !important;
+
+}
+.dashboard-card.orders .icon {
+background: #151515 !important;
+  
+}
+.dashboard-card.products .icon {
+  background: #151515 !important;
+ 
+}
+.dashboard-card.revenue .icon {
+  background: #151515 !important;
+
+}
+
+.card-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+
+}
+
+.card-label {
+  font-size: 0.95rem;
+    color: #000000;
+}
+
+.recent-orders-section {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(16,30,54,0.06);
+  padding: 24px;
+}
+
+.recent-orders-section h3 {
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin-bottom: 18px;
+  color: #000000;
+}
+
+.orders-table-container {
+  overflow-x: auto;
+}
+
+.orders-table {
+  width: 100%;
+  border-collapse: collapse;
+  background:#151515;
+}
+
+.orders-table th, .orders-table td {
+  padding: 12px 16px;
+  text-align: left;
+}
+
+.orders-table th {
+  color: #ffffff;
+  font-weight: 600;
+  background: #f7f9fb;
+}
+
+.orders-table tr {
+  border-bottom: 1px solid #f0f1f7;
+}
+
+.orders-table tr:last-child {
+  border-bottom: none;
+}
+
+.status {
+  display: inline-block;
+  padding: 2px 12px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.status.processing {
+ background: #151515 !important;
+}
+.status.shipped {
+  background: #151515 !important;
+}
+.status.delivered {
+  background: #151515 !important;
+}
+
+.dashboard-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 24px;
+  color: #222b45;
+}
+
+.dashboard-cards {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.dashboard-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(16,30,54,0.06);
+  padding: 24px 32px;
+  display: flex;
+  align-items: center;
+  min-width: 220px;
+  flex: 1;
+  gap: 16px;
+}
+
+.dashboard-card .icon {
+  font-size: 2.0rem;      /* Make icon bigger */
+  width: 50px;            /* Increase icon container size */
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  margin-right: 12px;
+  color: #fff !important; /* Make icon white */
+}
+
+
+.card-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #222b45;
+}
+
+.card-label {
+  font-size: 0.95rem;
+  color: #8f9bb3;
+}
+
+.recent-orders-section {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 5px 8px rgba(0, 0, 0, 0.06);
+  padding: 24px;
+}
+
+.recent-orders-section h3 {
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin-bottom: 18px;
+  color: #222b45;
+}
+
+.orders-table-container {
+  overflow-x: auto;
+}
+
+.orders-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+}
+
+.orders-table th, .orders-table td {
+  padding: 12px 16px;
+  text-align: left;
+}
+
+.orders-table th {
+  color: #000000;
+  font-weight: 600;
+background: #ffffff;
+}
+
+.orders-table tr {
+  border-bottom: 1px solid #f0f1f7;
+}
+
+.orders-table tr:last-child {
+  border-bottom: none;
+}
+
+.status {
+  display: inline-block;
+  padding: 2px 12px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.dashboard-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(16,30,54,0.06);
+  padding: 24px 32px;
+  display: flex;
+  align-items: center;
+  min-width: 220px;
+  flex: 1;
+  gap: 16px;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.dashboard-card:hover {
+  box-shadow: 0 8px 32px rgba(16,30,54,0.18);
+  transform: translateY(-4px) scale(1.03);
+  cursor: pointer;
+}
+
+
+.orders-table tr {
+  border-bottom: 1px solid #f0f1f7;
+  transition: background 0.18s;
+}
+
+.orders-table tr:hover {
+  background: #f5f5f5;
+}

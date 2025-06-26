@@ -1,0 +1,103 @@
+.navbar {
+width: 100%;
+  background: #151515;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 40px;
+  height: 70px;
+  box-sizing: border-box;
+  position: fixed;      
+  top: 0;              
+  left: 0;             
+  z-index: 1000;        
+}
+
+.navbar-section {
+  display: flex;
+  align-items: center;
+  padding-left: 60px;
+}
+
+.navbar-links a {
+  color: #fff;
+  text-decoration: none;
+  margin: 0 18px;
+  font-size: 15px;
+  font-family: Arial, sans-serif;
+  transition: color 0.2s;
+
+}
+
+
+.navbar-links a:hover {
+  color: #b3b3b3;
+  
+}
+
+.navbar-logo {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.logo-img {
+  height: 32px;
+  object-fit: contain;
+}
+
+.navbar-actions {
+  gap: 12px;
+  display: flex;
+  align-items: center;
+}
+
+.navbar-search {
+  background: #222;
+  border: none;
+  border-radius: 18px;
+  padding: 6px 18px;
+  color: #fff;
+  font-size: 14px;
+  margin-right: 10px;
+  outline: none;
+  width: 160px;
+}
+
+.navbar-icon {
+  color: #fff;
+  font-size: 26px !important;
+  cursor: pointer;
+  margin-left: 8px;
+  transition: color 0.2s;
+}
+
+.navbar-icon:hover {
+  color: #b3b3b3;
+}
+
+/* Add to Navbar.css */
+.navbar-cart-btn {
+  position: relative;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+.navbar-cart-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: #222;
+  color: #fff;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: bold;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 2;
+}

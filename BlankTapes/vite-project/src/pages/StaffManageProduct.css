@@ -1,0 +1,289 @@
+/* Container for the whole user management page */
+.user-management-container {
+  margin-left: 270px;
+  padding: 40px 24px;
+  background: #f7f9fb;
+  min-height: 100vh;
+  color: #000;
+}
+
+/* Header */
+.user-management-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.user-management-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #222b45;
+}
+
+.add-user-btn {
+  background: #151515;
+  color: #fff;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 20px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.18s;
+}
+
+.add-user-btn:hover {
+  background: #222;
+}
+
+/* Filters/Search */
+.user-filters-container {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(16,30,54,0.06);
+  padding: 24px;
+  margin-bottom: 28px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  align-items: center;
+}
+
+.user-search-input {
+  flex: 1 1 220px;
+  padding: 10px 16px;
+  border: 1px solid #e4e9f2;
+  border-radius: 8px;
+  font-size: 1rem;
+  background: #f7f9fb;
+}
+
+.user-filter-select {
+  flex: 1 1 180px;
+  padding: 10px 16px;
+  border: 1px solid #e4e9f2;
+  border-radius: 8px;
+  font-size: 1rem;
+  background: #f7f9fb;
+}
+
+/* Table container: rounded, shadow, white background */
+.user-table-container {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 5px 16px rgba(16,30,54,0.08);
+  padding: 32px 24px;
+  margin-top: 24px;
+}
+
+/* Table: remove background, keep spacing */
+.user-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: transparent;
+}
+
+/* Table headers: bold, black, no background, center */
+.user-table th {
+  color: #000;
+  font-weight: 700;
+  background: none;
+  font-size: 1.08rem;
+  padding-bottom: 14px;
+  letter-spacing: 0.02em;
+  text-align: center;
+}
+
+/* Table cells: normal text, spacing, center */
+.user-table td {
+  color: #000;
+  font-size: 1rem;
+  padding: 14px 16px;
+  vertical-align: middle;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* Align product cell (image + name) horizontally */
+.user-table td:first-child {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: flex-start;
+  text-align: left;
+  white-space: normal;
+}
+
+/* Row borders: subtle */
+.user-table tr {
+  border-bottom: 1px solid #f0f1f7;
+  transition: background 0.18s;
+}
+.user-table tr:last-child {
+  border-bottom: none;
+}
+.user-table tr:hover {
+  background: #f5f5f5;
+}
+
+/* Role & Status badges */
+.role-badge {
+  display: inline-block;
+  padding: 2px 14px;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: #2563eb;
+}
+.role-badge.admin {
+  background: #2563eb;
+}
+.role-badge.staff {
+  background: #f59e1b;
+}
+.role-badge.customer {
+  background: #6b7280;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 18px;
+  border-radius: 16px;
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: #22c55e;
+  background: #e7fbe9;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: none;
+  border: none;
+}
+.status-badge.inactive {
+  background: #fdeaea;
+  color: #ef4444;
+}
+
+/* Actions */
+.user-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.action-btn {
+  border: none;
+  background: #151515;
+  color: #fff;
+  cursor: pointer;
+  padding: 7px 10px;
+  border-radius: 8px;
+  transition: background 0.15s;
+  font-size: 1.15rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.action-btn.edit {
+  background: #151515;
+  color: #fff;
+}
+.action-btn.edit:hover {
+  background: #222;
+}
+.action-btn.delete {
+  background: #151515;
+  color: #fff;
+}
+.action-btn.delete:hover {
+  background: #222;
+}
+
+/* Modal */
+.user-modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.18);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.user-modal {
+  background: #fff;
+  border-radius: 18px;
+  padding: 36px 32px 28px 32px;
+  min-width: 400px;
+  max-width: 98vw;
+  box-shadow: 0 8px 32px rgba(16,30,54,0.18);
+  color: #000;
+}
+
+.user-modal-title {
+  font-size: 1.45rem;
+  font-weight: 700;
+  margin-bottom: 22px;
+  color: #222b45;
+}
+
+.user-modal-form label {
+  font-weight: 600;
+  margin-bottom: 6px;
+  display: block;
+  color:  #151515;
+}
+
+.user-modal-form input,
+.user-modal-form select,
+.user-modal-form textarea {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #e4e9f2;
+  border-radius: 8px;
+  font-size: 1rem;
+  margin-bottom: 18px;
+  background: #f7f9fb;
+}
+
+.user-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 14px;
+  margin-top: 8px;
+}
+
+.user-modal-cancel {
+  background: #151515;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 22px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.18s;
+}
+
+.user-modal-cancel:hover {
+  background: #222;
+}
+
+.user-modal-submit {
+  background: #151515;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 22px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.18s;
+}
+
+.user-modal-submit:hover {
+  background: #222;
+}
