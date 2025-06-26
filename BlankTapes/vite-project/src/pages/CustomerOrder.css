@@ -408,18 +408,20 @@
 
 
 .cancel-order-btn {
-  margin-top: 20px;
+  /* Remove block and width for inline placement */
+  display: inline-block;
+  width: auto;         /* Let it size to content */
+  max-width: none;
+  margin-left: 18px;    /* Space from status */
+  margin-right: 0;
+  margin-top: 12px;     /* Lower it a bit below the status */
+  vertical-align: top;  /* Align with status */
   background: #151515;
   color: #fff;
   border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
+  padding: 10px 30px;
+  border-radius: 8px;
   cursor: pointer;
-  display: block;
-  width: 100%;
-  max-width: 600px;
-  margin-left: auto;
-  margin-right: auto;
 }
 .cancel-order-btn:hover {
   background: #202020;

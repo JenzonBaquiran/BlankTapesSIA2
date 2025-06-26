@@ -129,7 +129,16 @@ function CustomerOrder() {
             <h2>Order {selectedOrder.id}</h2>
             <span className="order-date">Placed on {selectedOrder.date}</span>
           </div>
-          <span className="order-status shipped">{selectedOrder.status}</span>
+          <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+            <span className="order-status shipped">{selectedOrder.status}</span>
+            <button
+              className="cancel-order-btn"
+              style={{ marginTop: 0, maxWidth: "180px", width: "auto", padding: "8px 18px" }}
+              onClick={handleCancelOrder}
+            >
+              Cancel Order
+            </button>
+          </div>
         </div>
         <div className="order-main">
           <div className="order-status-section">
@@ -178,12 +187,6 @@ function CustomerOrder() {
                 <div>Estimated Delivery: <strong>{selectedOrder.date}</strong></div>
               </div>
             </div>
-            <button
-              className="cancel-order-btn"
-              onClick={handleCancelOrder}
-            >
-              Cancel Order
-            </button>
           </div>
         </div>
       </div>
