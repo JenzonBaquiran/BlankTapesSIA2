@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import './AdminDashboard.css'
 import AdminSidebar from '../pages/AdminSidebar'
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
@@ -7,6 +7,15 @@ import PersonIcon from '@mui/icons-material/Person';
 import InventoryIcon from '@mui/icons-material/Inventory';
 
 function AdminDashboard() {
+  const [totalUsers, setTotalUsers] = useState(0);
+
+  useEffect(() => {
+    fetch("http://localhost:1337/api/users")
+      .then(res => res.json())
+      .then(data => setTotalUsers(data.length))
+      .catch(() => setTotalUsers(0));
+  }, []);
+
   return (
     <div className="admin-dashboard-container">
       <AdminSidebar />
@@ -15,9 +24,8 @@ function AdminDashboard() {
         <div className="dashboard-cards">
           <div className="dashboard-card users">
             <div className="icon"><PersonIcon /></div>
-
             <div>
-              <div className="card-value">5</div>
+              <div className="card-value">{totalUsers}</div>
               <div className="card-label">Total Users</div>
             </div>
           </div>

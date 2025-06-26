@@ -6,91 +6,74 @@ const path = require("path");
 const Product = require("./models/product");
 const User = require("./models/user.model");
 const bcrypt = require("bcryptjs");
+const helmet = require("helmet");
+const mongoSanitize = require("express-mongo-sanitize");
+const validator = require("validator");
+const fs = require("fs");
 const app = express();
 const port = 1337;
 
 // Middleware
 app.use(cors());
 app.use(express.json());
-
-// Serve uploaded images statically
+app.use(express.urlencoded({ extended: true }));
+app.use(helmet());
+app.use(mongoSanitize());
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-// Multer setup for image uploads
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "uploads/");
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, uniqueSuffix + path.extname(file.originalname));
-  },
-});
-const upload = multer({ storage });
- 
 // MongoDB Connection
 mongoose.connect("mongodb://127.0.0.1:27017/BlankTapes", {});
-mongoose.connection.on("connected", () => {
+mongoose.connection.on("connected", async () => {
   console.log(" Connected to MongoDB");
+  // Ensure default admin exists
+  const admin = await User.findOne({ username: "admin" });
+  if (!admin) {
+    const hashedPassword = await bcrypt.hash("admin123", 10);
+    await User.create({
+      id: "1",
+      username: "admin",
+      password: hashedPassword,
+      role: "admin",
+      email: "admin@blanktapes.com",
+      status: "active",
+      created: new Date().toISOString().slice(0, 10),
+      lastLogin: "",
+    });
+    console.log("Default admin account created: admin / admin123");
+  }
 });
 mongoose.connection.on("error", (err) => {
   console.error("❌ MongoDB connection error:", err);
 });
 
-// --- Validation Helpers ---
-function validateProductInput(data) {
-  const errors = [];
-  if (!data.id || typeof data.id !== "string") errors.push("Product ID is required and must be a string.");
-  if (!data.name || typeof data.name !== "string") errors.push("Product name is required and must be a string.");
-  if (data.price === undefined || isNaN(Number(data.price))) errors.push("Product price is required and must be a number.");
-  if (!data.description || typeof data.description !== "string") errors.push("Product description is required and must be a string.");
-  if (!data.type || typeof data.type !== "string") errors.push("Product type is required and must be a string.");
-  if (
-    data.available === undefined ||
-    (typeof data.available !== "boolean" &&
-      data.available !== "true" &&
-      data.available !== "false")
-  )
-    errors.push("Product availability is required and must be true or false.");
-  return errors;
-}
+// --- Product Image Upload Setup ---
+const uploadDir = path.join(__dirname, "uploads");
+if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
 
-function validateUserInput(data) {
-  const errors = [];
-  if (!data.id || typeof data.id !== "string") errors.push("User ID is required and must be a string.");
-  if (!data.username || typeof data.username !== "string") errors.push("Username is required and must be a string.");
-  if (!data.password || typeof data.password !== "string" || data.password.length < 6) errors.push("Password is required and must be at least 6 characters.");
-  return errors;
-}
-
-// --- Product Routes ---
-
-app.get("/api/products", async (req, res) => {
-  try {
-    const products = await Product.find();
-    res.json(products);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, uploadDir),
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    cb(null, `${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`);
   }
 });
+const upload = multer({ storage });
 
-// Create product with image upload
+// --- Add Product ---
 app.post("/api/products", upload.single("image"), async (req, res) => {
-  const { id, name, price, description, type, available } = req.body;
-  const errors = validateProductInput(req.body);
-  if (errors.length > 0) {
-    return res.status(400).json({ errors });
-  }
   try {
-    const imageUrl = req.file ? `/uploads/${req.file.filename}` : "";
+    const { name, description, category, price, stock, status } = req.body;
+    if (!name || !description || !category || !price || !stock) {
+      return res.status(400).json({ error: "All fields are required." });
+    }
     const product = new Product({
-      id,
       name,
-      price,
       description,
-      imageUrl,
-      type,
-      available,
+      category,
+      price,
+      stock,
+      status,
+      imageUrl: req.file ? `/uploads/${req.file.filename}` : ""
     });
     await product.save();
     res.json(product);
@@ -99,110 +82,185 @@ app.post("/api/products", upload.single("image"), async (req, res) => {
   }
 });
 
-// Update product (optionally with image)
+// --- Edit Product ---
 app.put("/api/products/:id", upload.single("image"), async (req, res) => {
-  const errors = validateProductInput({ ...req.body, id: req.params.id });
-  if (errors.length > 0) {
-    return res.status(400).json({ errors });
-  }
   try {
-    const updateData = { ...req.body };
-    if (req.file) {
-      updateData.imageUrl = `/uploads/${req.file.filename}`;
-    }
-    const updated = await Product.findOneAndUpdate(
-      { id: req.params.id },
-      updateData,
-      { new: true }
-    );
-    res.json(updated);
+    const { name, description, category, price, stock, status } = req.body;
+    const update = { name, description, category, price, stock, status };
+    if (req.file) update.imageUrl = `/uploads/${req.file.filename}`;
+    const product = await Product.findByIdAndUpdate(req.params.id, update, { new: true });
+    if (!product) return res.status(404).json({ error: "Product not found." });
+    res.json(product);
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
 });
 
-app.delete("/api/products/:id", async (req, res) => {
-  if (!req.params.id) {
-    return res.status(400).json({ error: "Product ID is required." });
-  }
+// --- Mark Product as Out of Stock (Soft Delete) ---
+app.put("/api/products/:id/out_of_stock", async (req, res) => {
   try {
-    await Product.findOneAndDelete({ id: req.params.id });
+    const product = await Product.findByIdAndUpdate(
+      req.params.id,
+      { status: "out_of_stock" },
+      { new: true }
+    );
+    if (!product) return res.status(404).json({ error: "Product not found." });
+    res.json(product);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// --- Delete Product (Hard Delete) ---
+app.delete("/api/products/:id", async (req, res) => {
+  try {
+    const product = await Product.findByIdAndDelete(req.params.id);
+    if (!product) return res.status(404).json({ error: "Product not found." });
+    // Optionally delete image file
+    if (product.imageUrl && product.imageUrl.startsWith("/uploads/")) {
+      const imgPath = path.join(__dirname, product.imageUrl);
+      if (fs.existsSync(imgPath)) fs.unlinkSync(imgPath);
+    }
     res.json({ success: true });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
 });
 
-// --- User Routes ---
-
-app.post("/api/users", async (req, res) => {
-  const errors = validateUserInput(req.body);
-  if (errors.length > 0) {
-    return res.status(400).json({ errors });
-  }
+// --- Get All Products ---
+app.get("/api/products", async (req, res) => {
   try {
-    const user = new User(req.body); // password is saved as plain text
-    await user.save();
-    res.json(user);
+    const products = await Product.find().sort({ createdAt: -1 });
+    res.json(products);
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    res.status(500).json({ error: err.message });
   }
 });
 
+// --- User APIs ---
+
+// Get all users
 app.get("/api/users", async (req, res) => {
   try {
-    const users = await User.find();
+    const users = await User.find().sort({ created: -1 });
     res.json(users);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// Login user (plain text password check)
-app.post("/api/login", async (req, res) => {
-  const { username, password } = req.body;
-  if (!username || !password) {
-    return res.status(400).json({ error: "Username and password are required." });
-  }
+// Add user
+app.post("/api/users", async (req, res) => {
   try {
-    const user = await User.findOne({ username, password }); // plain text match
-    if (!user) {
-      return res.status(401).json({ success: false, error: "Invalid username or password" });
+    const { username, email, password, role, status } = req.body;
+    if (!username || !email || !password) {
+      return res.status(400).json({ error: "Username, email, and password are required." });
     }
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = new User({
+      id: Date.now().toString(),
+      username,
+      email,
+      password: hashedPassword,
+      role,
+      status,
+      created: new Date().toISOString().slice(0, 10),
+      lastLogin: "",
+    });
+    await user.save();
     res.json({ success: true, user });
-  } catch (error) {
-    console.error("Error during login:", error);
-    res.status(500).json({ success: false, error: "Error during login" });
-  }
-});
-
-app.put("/api/users/:id", async (req, res) => {
-  const errors = validateUserInput({ ...req.body, id: req.params.id });
-  if (errors.length > 0) {
-    return res.status(400).json({ errors });
-  }
-  try {
-    const updated = await User.findOneAndUpdate(
-      { id: req.params.id },
-      req.body,
-      { new: true }
-    );
-    res.json(updated);
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
 });
 
-// Delete user by id
-app.delete("/api/users/:id", async (req, res) => {
-  if (!req.params.id) {
-    return res.status(400).json({ error: "User ID is required." });
+// Update user
+app.put("/api/users/:id", async (req, res) => {
+  try {
+    const update = { ...req.body };
+    if (update.password) {
+      update.password = await bcrypt.hash(update.password, 10);
+    } else {
+      delete update.password;
+    }
+    const user = await User.findOneAndUpdate({ id: req.params.id }, update, { new: true });
+    if (!user) return res.status(404).json({ error: "User not found." });
+    res.json({ success: true, user });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
   }
+});
+
+// Delete user
+app.delete("/api/users/:id", async (req, res) => {
   try {
     await User.findOneAndDelete({ id: req.params.id });
     res.json({ success: true });
   } catch (err) {
     res.status(400).json({ error: err.message });
+  }
+});
+
+// --- User Signup ---
+app.post("/api/signup", async (req, res) => {
+  try {
+    const { username, email, password } = req.body;
+    if (!username || !email || !password) {
+      return res.json({ success: false, error: "All fields are required." });
+    }
+    const existingUser = await User.findOne({ $or: [{ username }, { email }] });
+    if (existingUser) {
+      return res.json({ success: false, error: "Username or email already exists." });
+    }
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = new User({
+      id: Date.now().toString(),
+      username,
+      email,
+      password: hashedPassword,
+      role: "customer",
+      status: "active",
+      created: new Date().toISOString().slice(0, 10),
+      lastLogin: "",
+    });
+    await user.save();
+    res.json({ success: true, user });
+  } catch (err) {
+    res.json({ success: false, error: err.message });
+  }
+});
+
+// --- User Login ---
+app.post("/api/login", async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    if (!username || !password) {
+      return res.json({ success: false, error: "All fields are required." });
+    }
+    const user = await User.findOne({ username });
+    if (!user) {
+      return res.json({ success: false, error: "Invalid username or password." });
+    }
+    const match = await bcrypt.compare(password, user.password);
+    if (!match) {
+      return res.json({ success: false, error: "Invalid username or password." });
+    }
+    user.lastLogin = new Date().toISOString();
+    await user.save();
+    res.json({
+      success: true,
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+        status: user.status,
+        created: user.created,
+        lastLogin: user.lastLogin,
+      },
+    });
+  } catch (err) {
+    res.json({ success: false, error: err.message });
   }
 });
 

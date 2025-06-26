@@ -7,7 +7,31 @@ import logoWhite from "../img/logowhite.png"
 function Login() {
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
+  const [error, setError] = useState("")
   const navigate = useNavigate()
+
+  const handleLogin = async () => {
+    setError("")
+    try {
+      const res = await fetch("http://localhost:1337/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      })
+      const data = await res.json()
+      if (!data.success) {
+        setError(data.error || "Login failed.")
+        return
+      }
+      localStorage.setItem("username", data.user.username)
+      // Redirect based on role
+      if (data.user.role === "admin") navigate("/admindashboard")
+      else if (data.user.role === "staff") navigate("/staffsidebar")
+      else navigate("/home")
+    } catch (err) {
+      setError("Server error.")
+    }
+  }
 
   return (
     <div className="login-bg">
@@ -40,6 +64,7 @@ function Login() {
                 classes: { notchedOutline: "input-outline" },
               }}
             />
+            {error && <div style={{ color: "red", marginBottom: 8 }}>{error}</div>}
             <div className="login-links">
               <Button className="login-link" variant="text" fullWidth={false}>
                 FORGOT YOUR PASSWORD?
@@ -53,7 +78,7 @@ function Login() {
                 NEW HERE? SIGN UP
               </Button>
             </div>
-            <Button variant="contained" className="login-btn" fullWidth>
+            <Button variant="contained" className="login-btn" fullWidth onClick={handleLogin}>
               LOGIN
             </Button>
           </div>

@@ -1,8 +1,8 @@
 /* Container for the whole user management page */
 .user-management-container {
   margin-left: 270px;
-  padding: 50px 24px;
-  min-height: 100vh;
+  padding: 80px 200px;
+  min-height: 100vh;  
   color: #000;
   flex: 1
 }
@@ -162,6 +162,11 @@
   gap: 10px;
 }
 
+.user-table th,
+.user-table td {
+  text-align: center;
+  vertical-align: middle;
+}
 .action-btn {
   border: none;
   background: none;

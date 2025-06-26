@@ -1,74 +1,91 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import AdminSidebar from '../pages/AdminSidebar';
 import './AdminDashboard.css';
 import './ManageUser.css';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 
-const initialUsers = [
-  {
-    id: 1,
-    name: 'John Admin',
-    email: 'john@blanktapes.com',
-    password: 'admin123',
-    role: 'admin',
-    status: 'active',
-    avatar: 'https://randomuser.me/api/portraits/men/1.jpg',
-    created: '2024-01-15',
-    lastLogin: '2024-12-20',
-  },
-  // Add more users as needed
-];
-
 function ManageUser() {
-  const [users, setUsers] = useState(initialUsers);
+  const [users, setUsers] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [modalMode, setModalMode] = useState('add'); // 'add' or 'edit'
-  const [form, setForm] = useState({ name: '', email: '', password: '', role: 'customer', status: 'active' });
+  const [form, setForm] = useState({ username: '', email: '', password: '', role: 'customer', status: 'active' });
+  const [formError, setFormError] = useState("");
+
+  // Fetch users from backend
+  const fetchUsers = async () => {
+    const res = await fetch("http://localhost:1337/api/users");
+    const data = await res.json();
+    setUsers(data);
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
 
   const openAddModal = () => {
     setModalMode('add');
-    setForm({ name: '', email: '', password: '', role: 'customer', status: 'active' });
+    setForm({ username: '', email: '', password: '', role: 'customer', status: 'active' });
+    setFormError("");
     setShowModal(true);
   };
 
   const openEditModal = (user) => {
     setModalMode('edit');
     setForm({
-      name: user.name,
+      username: user.username,
       email: user.email,
-      password: user.password || '',
+      password: '',
       role: user.role,
       status: user.status,
       id: user.id
     });
+    setFormError("");
     setShowModal(true);
   };
 
   const closeModal = () => setShowModal(false);
 
-  const handleDeleteUser = (id) => {
-    setUsers(users.filter(u => u.id !== id));
+  const handleDeleteUser = async (id) => {
+    const res = await fetch(`http://localhost:1337/api/users/${id}`, { method: "DELETE" });
+    const data = await res.json();
+    if (data.success) {
+      fetchUsers();
+    } else {
+      alert(data.error || "Failed to delete user.");
+    }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setFormError("");
     if (modalMode === 'add') {
-      setUsers([
-        ...users,
-        {
-          ...form,
-          id: users.length ? Math.max(...users.map(u => u.id)) + 1 : 1,
-          created: new Date().toISOString().slice(0, 10),
-          lastLogin: '',
-        }
-      ]);
+      const res = await fetch("http://localhost:1337/api/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      const data = await res.json();
+      if (data.success) {
+        fetchUsers();
+        setShowModal(false);
+      } else {
+        setFormError(data.error || "Failed to add user.");
+      }
     } else if (modalMode === 'edit') {
-      setUsers(users.map(u =>
-        u.id === form.id ? { ...u, ...form } : u
-      ));
+      const res = await fetch(`http://localhost:1337/api/users/${form.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      const data = await res.json();
+      if (data.success) {
+        fetchUsers();
+        setShowModal(false);
+      } else {
+        setFormError(data.error || "Failed to update user.");
+      }
     }
-    setShowModal(false);
   };
 
   return (
@@ -81,30 +98,13 @@ function ManageUser() {
           <button className="add-user-btn" onClick={openAddModal}>+ Add User</button>
         </div>
 
-        {/* Filters */}
-        <div className="user-filters-container">
-          <input className="user-search-input" placeholder="Search users..." />
-          <select className="user-filter-select">
-            <option>All Roles</option>
-            <option>Admin</option>
-            <option>Staff</option>
-            <option>Customer</option>
-          </select>
-          <select className="user-filter-select">
-            <option>All Status</option>
-            <option>Active</option>
-            <option>Inactive</option>
-          </select>
-        </div>
-
         {/* Table */}
         <div className="user-table-container">
           <table className="user-table">
             <thead>
               <tr>
-                <th>User</th>
+                <th>Username</th>
                 <th>Email</th>
-                <th>Password</th>
                 <th>Role</th>
                 <th>Status</th>
                 <th>Created</th>
@@ -115,22 +115,14 @@ function ManageUser() {
             <tbody>
               {users.map(u => (
                 <tr key={u.id}>
-                  <td>
-                    {/* <img src={u.avatar} alt={u.name} className="user-avatar" /> */}
-                    {u.name}
-                  </td>
+                  <td>{u.username}</td>
                   <td>{u.email}</td>
                   <td>
-                    <span style={{ letterSpacing: '2px', fontFamily: 'monospace' }}>
-                      {u.password ? '•'.repeat(u.password.length) : ''}
-                    </span>
-                  </td>
-                  <td>
-                    <span className={`role-badge ${u.role}`}>{u.role.toUpperCase()}</span>
+                    <span className={`role-badge ${u.role}`}>{u.role?.toUpperCase()}</span>
                   </td>
                   <td>
                     <span className={`status-badge${u.status === 'inactive' ? ' inactive' : ''}`}>
-                      {u.status.toUpperCase()}
+                      {u.status?.toUpperCase()}
                     </span>
                   </td>
                   <td>{u.created}</td>
@@ -157,10 +149,10 @@ function ManageUser() {
                 {modalMode === 'add' ? 'Add New User' : 'Edit User'}
               </div>
               <form className="user-modal-form" onSubmit={handleSubmit}>
-                <label>Name</label>
+                <label>Username</label>
                 <input
-                  value={form.name}
-                  onChange={e => setForm({ ...form, name: e.target.value })}
+                  value={form.username}
+                  onChange={e => setForm({ ...form, username: e.target.value })}
                   required
                 />
                 <label>Email</label>
@@ -174,7 +166,8 @@ function ManageUser() {
                   type="password"
                   value={form.password}
                   onChange={e => setForm({ ...form, password: e.target.value })}
-                  required
+                  required={modalMode === 'add'}
+                  placeholder={modalMode === 'edit' ? "Leave blank to keep current password" : ""}
                 />
                 <label>Role</label>
                 <select value={form.role} onChange={e => setForm({ ...form, role: e.target.value })}>
@@ -187,6 +180,7 @@ function ManageUser() {
                   <option value="active">Active</option>
                   <option value="inactive">Inactive</option>
                 </select>
+                {formError && <div style={{ color: "red", marginBottom: 8 }}>{formError}</div>}
                 <div className="user-modal-actions">
                   <button type="button" className="user-modal-cancel" onClick={closeModal}>Cancel</button>
                   <button type="submit" className="user-modal-submit">

@@ -1,32 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import AdminSidebar from '../pages/AdminSidebar';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 
-const initialProducts = [
-  {
-    id: 1,
-    name: "BLKTPS © HOODIE BLACK",
-    description: "Premium black hoodie with embroidered logo",
-    image: "https://images.pexels.com/photos/3714894/pexels-photo-3714894.jpeg",
-    category: "Hoodies",
-    price: 2800,
-    stock: 25,
-    status: "active",
-    created: "2024-01-10"
-  }
-  // Add more products as needed
-];
-
-// Set categories to Hoodies, Short, and T-Shirts
 const categories = ["Hoodies", "Short", "T-Shirts"];
 
 function ManageProduct() {
-  const [products, setProducts] = useState(initialProducts);
+  const [products, setProducts] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const [modalMode, setModalMode] = useState('add'); // 'add' or 'edit'
+  const [modalMode, setModalMode] = useState('add');
   const [form, setForm] = useState({
     name: '',
+    description: '',
     category: '',
     price: '',
     stock: '',
@@ -34,12 +19,24 @@ function ManageProduct() {
     image: ''
   });
   const [imageFile, setImageFile] = useState(null);
+  const [editId, setEditId] = useState(null);
+
+  const fetchProducts = () => {
+    fetch('http://localhost:1337/api/products')
+      .then(res => res.json())
+      .then(data => setProducts(data));
+  };
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
 
   // Open Add Modal
   const openAddModal = () => {
     setModalMode('add');
     setForm({
       name: '',
+      description: '',
       category: '',
       price: '',
       stock: '',
@@ -48,23 +45,21 @@ function ManageProduct() {
     });
     setImageFile(null);
     setShowModal(true);
+    setEditId(null);
   };
 
   // Open Edit Modal
   const openEditModal = (product) => {
     setModalMode('edit');
-    // Ensure category is one of the allowed categories
-    let category = product.category;
-    if (!categories.includes(category)) {
-      category = "";
-    }
+    setEditId(product._id);
     setForm({
       name: product.name,
-      category: category,
+      description: product.description,
+      category: product.category,
       price: product.price,
       stock: product.stock,
       status: product.status,
-      image: product.image
+      image: product.imageUrl || product.image || ''
     });
     setImageFile(null);
     setShowModal(true);
@@ -73,37 +68,61 @@ function ManageProduct() {
   // Close Modal
   const closeModal = () => setShowModal(false);
 
-  // Handle Form Submit
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    let imageUrl = form.image;
-    if (imageFile) {
-      imageUrl = URL.createObjectURL(imageFile);
-    }
-    if (modalMode === 'add') {
-      setProducts([
-        ...products,
-        {
-          id: products.length + 1,
-          ...form,
-          image: imageUrl,
-          created: new Date().toISOString().slice(0, 10)
-        }
-      ]);
-    } else if (modalMode === 'edit') {
-      setProducts(products.map(p =>
-        p.name === form.name ? { ...p, ...form, image: imageUrl } : p
-      ));
-    }
-    setShowModal(false);
-  };
-
   // Handle file upload
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     setImageFile(file);
     if (file) {
       setForm({ ...form, image: URL.createObjectURL(file) });
+    }
+  };
+
+  // Handle Form Submit (Add/Edit)
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    // Validate all fields
+    if (!form.name || !form.description || !form.category || !form.price || !form.stock) {
+      alert('Please fill in all fields.');
+      return;
+    }
+    const formData = new FormData();
+    formData.append('name', form.name);
+    formData.append('description', form.description);
+    formData.append('category', form.category);
+    formData.append('price', form.price);
+    formData.append('stock', form.stock);
+    formData.append('status', form.status);
+    if (imageFile) formData.append('image', imageFile);
+
+    let response;
+    if (modalMode === 'add') {
+      response = await fetch('http://localhost:1337/api/products', {
+        method: 'POST',
+        body: formData
+      });
+    } else if (modalMode === 'edit' && editId) {
+      response = await fetch(`http://localhost:1337/api/products/${editId}`, {
+        method: 'PUT',
+        body: formData
+      });
+    }
+    if (!response.ok) {
+      const error = await response.json();
+      alert(error.error || 'Failed to save product.');
+      return;
+    }
+    fetchProducts();
+    setShowModal(false);
+  };
+
+  // Handle Delete (set status to out_of_stock)
+  const handleDelete = async (product) => {
+    if (window.confirm('Mark this product as out of stock?')) {
+      // Use the correct endpoint for soft delete
+      await fetch(`http://localhost:1337/api/products/${product._id}/out_of_stock`, {
+        method: 'PUT'
+      });
+      fetchProducts();
     }
   };
 
@@ -147,9 +166,20 @@ function ManageProduct() {
             </thead>
             <tbody>
               {products.map((p, idx) => (
-                <tr key={idx}>
+                <tr key={p._id || idx}>
                   <td style={{ display: 'flex', alignItems: 'center', gap: 12, textAlign: 'left' }}>
-                    <img src={p.image} alt={p.name} style={{ width: 40, height: 40, borderRadius: 5, objectFit: 'cover', marginRight: 8 }} />
+                    <img
+                      src={
+                        p.imageUrl
+                          ? p.imageUrl.startsWith('/uploads/')
+                            ? `http://localhost:1337${p.imageUrl}`
+                            : p.imageUrl
+                          : '/default-image.png'
+                      }
+                      alt={p.name}
+                      style={{ width: 40, height: 40, borderRadius: 5, objectFit: 'cover', marginRight: 8 }}
+                      onError={e => { e.target.onerror = null; e.target.src = '/default-image.png'; }}
+                    />
                     <div>
                       <div style={{ fontWeight: 600, marginTop: 10 }}>{p.name}</div>
                     </div>
@@ -164,12 +194,12 @@ function ManageProduct() {
                       <span className="status-badge inactive">OUT OF STOCK</span>
                     )}
                   </td>
-                  <td>{p.created}</td>
+                  <td>{(p.createdAt || p.created || '').slice(0, 10)}</td>
                   <td className="user-actions">
                     <button className="action-btn edit" title="Edit" onClick={() => openEditModal(p)}>
                       <EditIcon />
                     </button>
-                    <button className="action-btn delete" title="Delete">
+                    <button className="action-btn delete" title="Delete" onClick={() => handleDelete(p)}>
                       <DeleteIcon />
                     </button>
                   </td>
@@ -191,6 +221,13 @@ function ManageProduct() {
                 <input
                   value={form.name}
                   onChange={e => setForm({ ...form, name: e.target.value })}
+                  required
+                  style={{ fontFamily: 'Arial, sans-serif' }}
+                />
+                <label>Description</label>
+                <input
+                  value={form.description}
+                  onChange={e => setForm({ ...form, description: e.target.value })}
                   required
                   style={{ fontFamily: 'Arial, sans-serif' }}
                 />
@@ -247,9 +284,14 @@ function ManageProduct() {
                 />
                 {form.image && (
                   <img
-                    src={form.image}
+                    src={
+                      typeof form.image === "string" && form.image.startsWith('/uploads/')
+                        ? `http://localhost:1337${form.image}`
+                        : form.image
+                    }
                     alt="Preview"
                     style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 8, marginBottom: 12 }}
+                    onError={e => { e.target.onerror = null; e.target.src = '/default-image.png'; }}
                   />
                 )}
                 <div className="user-modal-actions">

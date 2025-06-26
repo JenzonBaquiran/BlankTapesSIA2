@@ -13,9 +13,13 @@
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
     "express": "^4.21.2",
+    "express-mongo-sanitize": "^2.2.0",
+    "express-rate-limit": "^7.5.1",
     "file-server": "^2.2.1",
+    "helmet": "^8.1.0",
     "mongoose": "^8.13.2",
     "multer": "^2.0.0",
-    "nodemon": "^3.1.9"
+    "nodemon": "^3.1.9",
+    "validator": "^13.15.15"
   }
 }

@@ -6,9 +6,39 @@ import logoWhite from "../img/logowhite.png"
 
 function SignUp() {
   const [email, setEmail] = useState("")
+  const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
+  const [error, setError] = useState("")
+  const [success, setSuccess] = useState("")
   const navigate = useNavigate()
+
+  const handleSignUp = async () => {
+    setError("")
+    setSuccess("")
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.")
+      return
+    }
+    try {
+      const res = await fetch("http://localhost:1337/api/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password, email }),
+      })
+      const data = await res.json()
+      if (!data.success) {
+        setError(data.error || "Sign up failed.")
+        return
+      }
+      setSuccess("Sign up successful! Redirecting to login...")
+      setTimeout(() => {
+        navigate("/")
+      }, 1500)
+    } catch (err) {
+      setError("Server error.")
+    }
+  }
 
   return (
     <div className="login-bg">
@@ -23,6 +53,17 @@ function SignUp() {
               placeholder="EMAIL"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              fullWidth
+              className="login-input"
+              InputProps={{
+                classes: { notchedOutline: "input-outline" },
+              }}
+            />
+            <TextField
+              variant="outlined"
+              placeholder="USERNAME"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               fullWidth
               className="login-input"
               InputProps={{
@@ -53,6 +94,8 @@ function SignUp() {
                 classes: { notchedOutline: "input-outline" },
               }}
             />
+            {error && <div style={{ color: "red", marginBottom: 8 }}>{error}</div>}
+            {success && <div style={{ color: "green", marginBottom: 8 }}>{success}</div>}
             <div className="login-links">
               <Button
                 className="login-link"
@@ -63,7 +106,7 @@ function SignUp() {
                 ALREADY HAVE AN ACCOUNT? LOGIN
               </Button>
             </div>
-            <Button variant="contained" className="login-btn" fullWidth>
+            <Button variant="contained" className="login-btn" fullWidth onClick={handleSignUp}>
               SIGN UP
             </Button>
           </div>
@@ -73,4 +116,4 @@ function SignUp() {
   )
 }
 
-export default SignUp;
+export default SignUp

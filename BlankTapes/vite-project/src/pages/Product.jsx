@@ -1,219 +1,58 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './Product.css';
 import Navbar from "./Navbar.jsx";
 import Footer from "./Footer.jsx";
-import hoodieBlack from '../img/hoodie-black.png';
-import hoodieAshGrey from '../img/hoodie-ash-grey.png';
-import hoodieCobalt from '../img/hoodie-cobalt.png';
-import hoodieRacingGreen from '../img/hoodie-racing-green.png';
-import hoodieStorm from '../img/hoodie-storm.png';
-import hoodieMidPurple from '../img/hoodie-mid-purple.png';
-import shirtAgedBlack from '../img/shirt-aged-black.png';
-import shirtBlack from '../img/shirt-black.png';
-import shirtCobalt from '../img/shirt-cobalt.png';
-import shortAgedBlack from '../img/short-aged-black.png';
-import shortMidPurple from '../img/short-mid-purple.png';
-import shortButterCream from '../img/short-butter-cream.png';
-
-// Add color and type to each product
-const products = [
-  {
-    img: hoodieBlack,
-    title: "BLKTPS © HOODIE BLACK",
-    price: "₱2,800.00 PHP",
-    color: "Black",
-    type: "hoodie",
-    available: true
-  },
-  {
-    img: shortButterCream,
-    title: "BLKTPS © SHORT BUTTER CREAM",
-    price: "₱950.00 PHP",
-    color: "Butter Cream",
-    type: "short",
-    available: true
-  },
-  {
-    img: hoodieAshGrey,
-    title: "BLKTPS © HOODIE ASH GREY",
-    price: "₱2,800.00 PHP",
-    color: "Ash Grey",
-    type: "hoodie",
-    available: true
-  },
-  {
-    img: hoodieCobalt,
-    title: "BLKTPS © HOODIE COBALT",
-    price: "₱2,800.00 PHP",
-    color: "Cobalt",
-    type: "hoodie",
-    available: true
-  },
-  {
-    img: hoodieRacingGreen,
-    title: "BLKTPS © HOODIE RACING GREEN",
-    price: "₱2,800.00 PHP",
-    color: "Racing Green",
-    type: "hoodie",
-    available: true
-  },
-  {
-    img: hoodieStorm,
-    title: "BLKTPS © HOODIE STORM",
-    price: "₱2,800.00 PHP",
-    color: "Storm",
-    type: "hoodie",
-    available: true
-  },
-  {
-    img: hoodieMidPurple,
-    title: "BLKTPS © HOODIE MID PURPLE",
-    price: "₱2,800.00 PHP",
-    color: "Mid Purple",
-    type: "hoodie",
-    available: true
-  },
-  {  
-    img: shirtAgedBlack,
-    title: "BLKTPS © SHIRT AGED BLACK",
-    price: "₱900.00 PHP",
-    color: "Aged Black",
-    type: "shirt",
-    available: true
-  },
-  {
-    img: shirtBlack,
-    title: "BLKTPS © SHIRT BLACK",
-    price: "₱900.00 PHP",
-    color: "Black",
-    type: "shirt",
-    available: true
-  },
-  {
-    img: shirtCobalt,
-    title: "BLKTPS © SHIRT COBALT",
-    price: "₱900.00 PHP",
-    color: "Cobalt",
-    type: "shirt",
-    available: true
-  },
-  {
-    img: shortButterCream,
-    title: "BLKTPS © SHORT BUTTER CREAM",
-    price: "₱950.00 PHP",
-    color: "Butter Cream",
-    type: "short",
-    available: true
-  },
-  {
-    img: shortAgedBlack,
-    title: "BLKTPS © SHORT AGED BLACK",
-    price: "₱950.00 PHP",
-    color: "Aged Black",
-    type: "short",
-    available: true
-  },
-  {
-    img: shortMidPurple,
-    title: "BLKTPS © SHORT MID PURPLE",
-    price: "₱950.00 PHP",
-    color: "Mid Purple",
-    type: "short",
-    available: true
-  },
-  {
-    img: shortButterCream,
-    title: "BLKTPS © SHORT BUTTER CREAM",
-    price: "₱950.00 PHP",
-    color: "Butter Cream",
-    type: "short",
-    available: true
-  },
-];
-
-// Color options for each type
-const colorOptions = {
-  hoodie: [
-    { img: hoodieBlack, color: "Black" },
-    { img: hoodieAshGrey, color: "Ash Grey" },
-    { img: hoodieCobalt, color: "Cobalt" },
-    { img: hoodieRacingGreen, color: "Racing Green" },
-    { img: hoodieStorm, color: "Storm" },
-    { img: hoodieMidPurple, color: "Mid Purple" },
-  ],
-  shirt: [
-    { img: shirtAgedBlack, color: "Aged Black" },
-    { img: shirtBlack, color: "Black" },
-    { img: shirtCobalt, color: "Cobalt" },
-  ],
-  short: [
-    { img: shortAgedBlack, color: "Aged Black" },
-    { img: shortMidPurple, color: "Mid Purple" },
-    { img: shortButterCream, color: "Butter Cream" },
-  ]
-};
 
 function Product() {
+  const [products, setProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const [selectedColor, setSelectedColor] = useState(null);
   const [selectedSize, setSelectedSize] = useState("XS");
   const [sort, setSort] = useState(null);
   const [availabilityFilter, setAvailabilityFilter] = useState('all');
   const [cartOpen, setCartOpen] = useState(false);
   const [cart, setCart] = useState([]);
 
+  // Fetch products from backend and only show active ones (case-insensitive)
+  useEffect(() => {
+    fetch('http://localhost:1337/api/products')
+      .then(res => res.json())
+      .then(data => {
+        setProducts(data.filter(p => (p.status || '').toLowerCase() === 'active'));
+      });
+  }, []);
+
   // Filtering and sorting logic
   let filteredProducts = [...products];
   if (availabilityFilter === 'inStock') {
-    filteredProducts = filteredProducts.filter(p => p.available);
+    filteredProducts = filteredProducts.filter(p => p.stock > 0);
   }
   if (sort === 'alphabetical') {
-    filteredProducts.sort((a, b) => a.title.localeCompare(b.title));
+    filteredProducts.sort((a, b) => a.name.localeCompare(b.name));
   } else if (sort === 'price') {
-    filteredProducts.sort((a, b) => {
-      const priceA = parseFloat(a.price.replace(/[^0-9.]/g, ''));
-      const priceB = parseFloat(b.price.replace(/[^0-9.]/g, ''));
-      return priceA - priceB;
-    });
+    filteredProducts.sort((a, b) => Number(a.price) - Number(b.price));
   } else if (sort === 'type') {
     const typeOrder = { hoodie: 1, shirt: 2, short: 3 };
     filteredProducts.sort((a, b) => {
-      return (typeOrder[a.type] || 99) - (typeOrder[b.type] || 99);
+      return (typeOrder[a.category?.toLowerCase()] || 99) - (typeOrder[b.category?.toLowerCase()] || 99);
     });
   }
 
-  // Filter products by type if a modal is open
-  const displayedProducts = selectedProduct
-    ? filteredProducts.filter(p => p.type === selectedProduct.type)
-    : filteredProducts;
+  const displayedProducts = filteredProducts;
 
   const handleProductClick = (product) => {
     setSelectedProduct(product);
-    setSelectedColor(product.color);
-    setSelectedSize("XS"); // Reset size on open
+    setSelectedSize("XS");
   };
 
   const handleCloseModal = () => {
     setSelectedProduct(null);
-    setSelectedColor(null);
     setSelectedSize("XS");
-  };
-
-  // Find the color options for the current product type
-  const currentType = selectedProduct ? selectedProduct.type : null;
-  const currentColors = currentType ? colorOptions[currentType] : [];
-
-  // Find the product for the selected color
-  const getProductByColor = (color) => {
-    return products.find(
-      (p) => p.type === currentType && p.color === color
-    );
   };
 
   // Add to cart function
   const handleAddToCart = () => {
     if (!selectedProduct) return;
-    const key = `${selectedProduct.title}-${selectedColor}-${selectedSize}`;
+    const key = `${selectedProduct._id}-${selectedSize}`;
     setCart(prev => {
       const existing = prev.find(item => item.key === key);
       if (existing) {
@@ -227,9 +66,12 @@ function Product() {
           ...prev,
           {
             key,
-            title: selectedProduct.title,
-            color: selectedColor,
-            img: getProductByColor(selectedColor)?.img || selectedProduct.img,
+            name: selectedProduct.name,
+            img: selectedProduct.imageUrl
+              ? selectedProduct.imageUrl.startsWith('/uploads/')
+                ? `http://localhost:1337${selectedProduct.imageUrl}`
+                : selectedProduct.imageUrl
+              : '/default-image.png',
             price: selectedProduct.price,
             quantity: 1,
             size: selectedSize
@@ -259,7 +101,7 @@ function Product() {
 
   // Calculate total
   const cartTotal = cart.reduce((sum, item) => {
-    const price = parseFloat(item.price.replace(/[^0-9.]/g, ''));
+    const price = parseFloat(item.price);
     return sum + price * item.quantity;
   }, 0);
 
@@ -284,12 +126,11 @@ function Product() {
                 <div>
                   {cart.map(item => (
                     <div key={item.key} className="cart-item">
-                      <img src={item.img} alt={item.title} />
+                      <img src={item.img} alt={item.name} />
                       <div className="cart-item-details">
-                        <div style={{ fontWeight: 600 }}>{item.title}</div>
-                        <div style={{ fontSize: 14, color: "#555" }}>Color: {item.color}</div>
+                        <div style={{ fontWeight: 600 }}>{item.name}</div>
                         <div style={{ fontSize: 14, color: "#555" }}>Size: {item.size}</div>
-                        <div style={{ fontSize: 15, fontWeight: 600 }}>{item.price}</div>
+                        <div style={{ fontSize: 15, fontWeight: 600 }}>₱{Number(item.price).toLocaleString()}</div>
                         <div className="cart-qty">
                           <button onClick={() => handleChangeQuantity(item.key, -1)}>-</button>
                           <span>{item.quantity}</span>
@@ -358,14 +199,24 @@ function Product() {
           {displayedProducts.map((product, idx) => (
             <div
               className="product-card"
-              key={idx}
+              key={product._id || idx}
               onClick={() => handleProductClick(product)}
               style={{ cursor: "pointer" }}
             >
-              <img src={product.img} alt={product.title} />
+              <img
+                src={
+                  product.imageUrl
+                    ? product.imageUrl.startsWith('/uploads/')
+                      ? `http://localhost:1337${product.imageUrl}`
+                      : product.imageUrl
+                    : '/default-image.png'
+                }
+                alt={product.name}
+                onError={e => { e.target.onerror = null; e.target.src = '/default-image.png'; }}
+              />
               <div className="product-card-overlay">
-                <h3>{product.title}</h3>
-                <p>{product.price}</p>
+                <h3>{product.name}</h3>
+                <p>₱{Number(product.price).toLocaleString()}</p>
               </div>
             </div>
           ))}
@@ -380,40 +231,34 @@ function Product() {
               </button>
               <div className="modal-body" style={{ display: "flex", alignItems: "center" }}>
                 <img
-                  src={getProductByColor(selectedColor)?.img || selectedProduct.img}
-                  alt={selectedProduct.title}
+                  src={
+                    selectedProduct.imageUrl
+                      ? selectedProduct.imageUrl.startsWith('/uploads/')
+                        ? `http://localhost:1337${selectedProduct.imageUrl}`
+                        : selectedProduct.imageUrl
+                      : '/default-image.png'
+                  }
+                  alt={selectedProduct.name}
                   style={{ width: "350px", marginRight: "40px" }}
+                  onError={e => { e.target.onerror = null; e.target.src = '/default-image.png'; }}
                 />
                 <div>
-                  <h2 style={{ marginBottom: 0 }}>{selectedProduct.title}</h2>
-                  <h3 style={{ marginTop: 0 }}>{selectedProduct.price}</h3>
+                  <h2 style={{ marginBottom: 0 }}>{selectedProduct.name}</h2>
+                  <h3 style={{ marginTop: 0 }}>₱{Number(selectedProduct.price).toLocaleString()}</h3>
                   <div>
-                    <b>Color:</b> {selectedColor}
+                    <b>Category:</b> {selectedProduct.category}
                   </div>
-                  <div style={{ margin: "10px 0", display: "flex", gap: 16 }}>
-                    {currentColors.map((c) => (
-                      <span
-                        key={c.color}
-                        onClick={() => {
-                          setSelectedColor(c.color);
-                          // Change modal product if color is different
-                          const prod = getProductByColor(c.color);
-                          if (prod) setSelectedProduct(prod);
-                        }}
-                        style={{
-                          display: "inline-block",
-                          borderRadius: "100%",
-                          border: selectedColor === c.color ? "3px solid #000" : "2px solid #eee",
-                          padding: 3,
-                          background: "#fff",
-                          cursor: "pointer",
-                          marginRight: 8,
-                          transition: "border 0.2s"
-                        }}
-                      >
-                        <img src={c.img} alt={c.color} width={40} style={{ borderRadius: "50%" }} />
-                      </span>
-                    ))}
+                  <div>
+                    <b>Description:</b> {selectedProduct.description}
+                  </div>
+                  <div>
+                    <b>Stock:</b> {selectedProduct.stock}
+                  </div>
+                  <div>
+                    <b>Availability:</b> {selectedProduct.stock > 0 ? "In Stock" : "Out of Stock"}
+                  </div>
+                  <div>
+                    <b>Shipping:</b> Express Philippines Shipping
                   </div>
                   <div>
                     <b>Select Size:</b>
@@ -443,12 +288,6 @@ function Product() {
                         {size}
                       </button>
                     ))}
-                  </div>
-                  <div>
-                    <b>Availability:</b> In Stock
-                  </div>
-                  <div>
-                    <b>Shipping:</b> Express Philippines Shipping
                   </div>
                   <button
                     style={{
