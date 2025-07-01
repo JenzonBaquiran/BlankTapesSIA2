@@ -8,12 +8,18 @@ import InventoryIcon from '@mui/icons-material/Inventory';
 
 function AdminDashboard() {
   const [totalUsers, setTotalUsers] = useState(0);
+  const [totalProducts, setTotalProducts] = useState(0);
 
   useEffect(() => {
     fetch("http://localhost:1337/api/users")
       .then(res => res.json())
       .then(data => setTotalUsers(data.length))
       .catch(() => setTotalUsers(0));
+
+    fetch("http://localhost:1337/api/products")
+      .then(res => res.json())
+      .then(data => setTotalProducts(data.length))
+      .catch(() => setTotalProducts(0));
   }, []);
 
   return (
@@ -39,7 +45,7 @@ function AdminDashboard() {
           <div className="dashboard-card products">
             <div className="icon"><InventoryIcon /></div>
             <div>
-              <div className="card-value">5</div>
+              <div className="card-value">{totalProducts}</div>
               <div className="card-label">Total Products</div>
             </div>
           </div>

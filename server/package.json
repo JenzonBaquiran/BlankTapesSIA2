@@ -18,7 +18,7 @@
     "file-server": "^2.2.1",
     "helmet": "^8.1.0",
     "mongoose": "^8.13.2",
-    "multer": "^2.0.0",
+    "multer": "^2.0.1",
     "nodemon": "^3.1.9",
     "validator": "^13.15.15"
   }

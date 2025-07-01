@@ -1,71 +1,79 @@
 import React, { useState, useEffect } from 'react';
-import StaffSidebar from '../pages/StaffSidebar';
+import './ManageProduct.css';
+import AdminSidebar from '../pages/AdminSidebar';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
+import StaffSidebar from './StaffSidebar';
+
 
 const categories = ["Hoodies", "Short", "T-Shirts"];
+const API_URL = "http://localhost:1337/api/products";
 
-function StaffManageProduct() {
+function ManageProduct() {
   const [products, setProducts] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [modalMode, setModalMode] = useState('add');
   const [form, setForm] = useState({
     name: '',
+    description: '',
     category: '',
     price: '',
     stock: '',
     status: 'active',
-    image: '',
-    description: ''
+    image: ''
   });
   const [imageFile, setImageFile] = useState(null);
   const [editId, setEditId] = useState(null);
+  const [search, setSearch] = useState('');
+  const [filterCategory, setFilterCategory] = useState('All Categories');
+  const [filterStatus, setFilterStatus] = useState('All Status');
 
-  // Fetch products from backend
-  const fetchProducts = () => {
-    fetch('http://localhost:1337/api/products')
-      .then(res => res.json())
-      .then(data => setProducts(data));
-  };
-
+  // Fetch products on mount
   useEffect(() => {
-    fetchProducts();
+    fetch(API_URL)
+      .then(res => res.json())
+      .then(setProducts)
+      .catch(() => setProducts([]));
   }, []);
 
+  // Open Add Modal
   const openAddModal = () => {
     setModalMode('add');
     setForm({
       name: '',
+      description: '',
       category: '',
       price: '',
       stock: '',
       status: 'active',
-      image: '',
-      description: ''
+      image: ''
     });
     setImageFile(null);
     setShowModal(true);
     setEditId(null);
   };
 
+  // Open Edit Modal
   const openEditModal = (product) => {
     setModalMode('edit');
     setEditId(product._id);
     setForm({
       name: product.name,
+      description: product.description,
       category: product.category,
       price: product.price,
       stock: product.stock,
       status: product.status,
-      image: product.imageUrl || product.image || '',
-      description: product.description || ''
+      image: product.imageUrl || ''
     });
     setImageFile(null);
     setShowModal(true);
   };
 
+  // Close Modal
   const closeModal = () => setShowModal(false);
 
+  // Handle file upload
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     setImageFile(file);
@@ -74,42 +82,52 @@ function StaffManageProduct() {
     }
   };
 
+  // Add or Edit product
   const handleSubmit = async (e) => {
     e.preventDefault();
     const formData = new FormData();
-    formData.append('name', form.name);
-    formData.append('category', form.category);
-    formData.append('price', form.price);
-    formData.append('stock', form.stock);
-    formData.append('status', form.status);
-    formData.append('description', form.description);
-    if (imageFile) formData.append('image', imageFile);
+    formData.append("name", form.name);
+    formData.append("description", form.description);
+    formData.append("category", form.category);
+    formData.append("price", form.price);
+    formData.append("stock", form.stock);
+    formData.append("status", form.status);
+    if (imageFile) formData.append("image", imageFile);
 
-    if (modalMode === 'add') {
-      await fetch('http://localhost:1337/api/products', {
-        method: 'POST',
-        body: formData
-      });
-    } else if (modalMode === 'edit' && editId) {
-      await fetch(`http://localhost:1337/api/products/${editId}`, {
-        method: 'PUT',
-        body: formData
-      });
+    const method = modalMode === "add" ? "POST" : "PUT";
+    const url = modalMode === "add" ? API_URL : `${API_URL}/${editId}`;
+    const res = await fetch(url, {
+      method,
+      body: formData
+    });
+    const data = await res.json();
+    if (data.success || data._id) {
+      // Refresh products
+      fetch(API_URL)
+        .then(res => res.json())
+        .then(setProducts);
+      setShowModal(false);
+    } else {
+      alert(data.error || "Error saving product");
     }
-    fetchProducts();
-    setShowModal(false);
   };
 
-  // Mark as out_of_stock (do not delete from DB)
+  // Delete product
   const handleDelete = async (product) => {
-    if (window.confirm('Mark this product as out of stock?')) {
-      // Use the correct endpoint for soft delete
-      await fetch(`http://localhost:1337/api/products/${product._id}/out_of_stock`, {
-        method: 'PUT'
-      });
-      fetchProducts();
-    }
+    if (!window.confirm("Delete this product?")) return;
+    await fetch(`${API_URL}/${product._id}`, { method: "DELETE" });
+    setProducts(products.filter(p => p._id !== product._id));
   };
+
+  // Filtering logic
+  const filteredProducts = products.filter(product => {
+    const matchesSearch = product.name.toLowerCase().includes(search.toLowerCase());
+    const matchesCategory = filterCategory === 'All Categories' || product.category === filterCategory;
+    const matchesStatus =
+      filterStatus === 'All Status' ||
+      product.status === filterStatus;
+    return matchesSearch && matchesCategory && matchesStatus;
+  });
 
   return (
     <div style={{ display: 'flex' }}>
@@ -119,21 +137,35 @@ function StaffManageProduct() {
           <div className="user-management-title">PRODUCT MANAGEMENT</div>
           <button className="add-user-btn" onClick={openAddModal}>+ Add Product</button>
         </div>
+
         <div className="user-filters-container">
-          <input className="user-search-input" placeholder="Search products..." />
-          <select className="user-filter-select">
+          <input
+            className="user-search-input"
+            placeholder="Search products..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+          />
+          <select
+            className="user-filter-select"
+            value={filterCategory}
+            onChange={e => setFilterCategory(e.target.value)}
+          >
             <option>All Categories</option>
-            {categories.map(cat => (
-              <option key={cat}>{cat}</option>
-            ))}
+            <option>Hoodies</option>
+            <option>Short</option>
+            <option>T-Shirts</option>
           </select>
-          <select className="user-filter-select">
-            <option>All Status</option>
-            <option>Active</option>
-            <option>Inactive</option>
-            <option>Out of Stock</option>
+          <select
+            className="user-filter-select"
+            value={filterStatus}
+            onChange={e => setFilterStatus(e.target.value)}
+          >
+            <option value="All Status">All Status</option>
+            <option value="active">Active</option>
+            <option value="out_of_stock">Out of Stock</option>
           </select>
         </div>
+
         <div className="user-table-container">
           <table className="user-table">
             <thead>
@@ -148,49 +180,43 @@ function StaffManageProduct() {
               </tr>
             </thead>
             <tbody>
-              {products.map((p, idx) => (
-                <tr key={p._id || idx}>
-                  <td style={{ display: 'flex', alignItems: 'center', gap: 12, textAlign: 'left' }}>
-                    <img
-                      src={
-                        p.imageUrl
-                          ? p.imageUrl.startsWith('/uploads/')
-                            ? `http://localhost:1337${p.imageUrl}`
-                            : p.imageUrl
-                          : '/default-image.png'
-                      }
-                      alt={p.name}
-                      style={{ width: 40, height: 40, borderRadius: 5, objectFit: 'cover', marginRight: 8 }}
-                      onError={e => { e.target.onerror = null; e.target.src = '/default-image.png'; }}
-                    />
-                    <div>
-                      <div style={{ fontWeight: 600, marginTop: 10 }}>{p.name}</div>
-                    </div>
-                  </td>
-                  <td>{p.category}</td>
-                  <td>₱{Number(p.price).toLocaleString()}</td>
-                  <td>{p.stock}</td>
-                  <td>
-                    {p.status === "active" ? (
-                      <span className="status-badge">ACTIVE</span>
-                    ) : (
-                      <span className="status-badge inactive">OUT OF STOCK</span>
+              {filteredProducts.map(product => (
+                <tr key={product._id}>
+                  <td style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    {product.imageUrl && (
+                      <img
+                        src={`http://localhost:1337${product.imageUrl}`}
+                        alt={product.name}
+                        style={{ width: 40, height: 40, objectFit: 'cover', borderRadius: 6 }}
+                      />
                     )}
+                    {product.name}
                   </td>
-                  <td>{(p.createdAt || p.created || '').slice(0, 10)}</td>
-                  <td className="user-actions">
-                    <button className="action-btn edit" title="Edit" onClick={() => openEditModal(p)}>
-                      <EditIcon />
-                    </button>
-                    <button className="action-btn delete" title="Delete" onClick={() => handleDelete(p)}>
-                      <DeleteIcon />
-                    </button>
+                  <td>{product.category}</td>
+                  <td>₱{product.price}</td>
+                  <td>{product.stock}</td>
+                  <td>
+                    <span className={`status-badge${product.status === 'out_of_stock' ? ' inactive' : ''}`}>
+                      {product.status === 'active' ? 'ACTIVE' : 'OUT OF STOCK'}
+                    </span>
+                  </td>
+                  <td>{product.createdAt ? product.createdAt.slice(0,10) : ''}</td>
+                  <td>
+                    <div className="user-actions">
+                      <button className="action-btn edit" onClick={() => openEditModal(product)} style={{ marginRight: 8 }}>
+                        <EditIcon fontSize="small" />
+                      </button>
+                      <button className="action-btn delete" onClick={() => handleDelete(product)}>
+                        <DeleteIcon fontSize="small" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
+
         {/* Modal */}
         {showModal && (
           <div className="user-modal-overlay">
@@ -204,21 +230,18 @@ function StaffManageProduct() {
                   value={form.name}
                   onChange={e => setForm({ ...form, name: e.target.value })}
                   required
-                  style={{ fontFamily: 'Arial, sans-serif' }}
                 />
                 <label>Description</label>
                 <input
                   value={form.description}
                   onChange={e => setForm({ ...form, description: e.target.value })}
                   required
-                  style={{ fontFamily: 'Arial, sans-serif' }}
                 />
                 <label>Category</label>
                 <select
                   value={form.category}
                   onChange={e => setForm({ ...form, category: e.target.value })}
                   required
-                  style={{ fontFamily: 'Arial, sans-serif' }}
                 >
                   <option value="">Select Category</option>
                   {categories.map(cat => (
@@ -233,7 +256,6 @@ function StaffManageProduct() {
                       value={form.price}
                       onChange={e => setForm({ ...form, price: e.target.value })}
                       required
-                      style={{ fontFamily: 'Arial, sans-serif' }}
                     />
                   </div>
                   <div style={{ flex: 1 }}>
@@ -243,7 +265,6 @@ function StaffManageProduct() {
                       value={form.stock}
                       onChange={e => setForm({ ...form, stock: e.target.value })}
                       required
-                      style={{ fontFamily: 'Arial, sans-serif' }}
                     />
                   </div>
                 </div>
@@ -252,7 +273,6 @@ function StaffManageProduct() {
                   value={form.status}
                   onChange={e => setForm({ ...form, status: e.target.value })}
                   required
-                  style={{ fontFamily: 'Arial, sans-serif' }}
                 >
                   <option value="active">Active</option>
                   <option value="out_of_stock">Out of Stock</option>
@@ -262,7 +282,7 @@ function StaffManageProduct() {
                   type="file"
                   accept="image/*"
                   onChange={handleImageChange}
-                  style={{ fontFamily: 'Arial, sans-serif', marginBottom: 18 }}
+                  style={{ marginBottom: 18 }}
                 />
                 {form.image && (
                   <img
@@ -273,7 +293,6 @@ function StaffManageProduct() {
                     }
                     alt="Preview"
                     style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 8, marginBottom: 12 }}
-                    onError={e => { e.target.onerror = null; e.target.src = '/default-image.png'; }}
                   />
                 )}
                 <div className="user-modal-actions">
@@ -286,9 +305,10 @@ function StaffManageProduct() {
             </div>
           </div>
         )}
+
       </div>
     </div>
   );
 }
 
-export default StaffManageProduct;
+export default ManageProduct;

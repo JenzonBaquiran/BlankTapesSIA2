@@ -1,25 +1,35 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
-const multer = require("multer");
 const path = require("path");
-const Product = require("./models/product");
 const User = require("./models/user.model");
+const Product = require("./models/product");
+const Order = require("./models/order");
 const bcrypt = require("bcryptjs");
-const helmet = require("helmet");
-const mongoSanitize = require("express-mongo-sanitize");
-const validator = require("validator");
 const fs = require("fs");
+const multer = require("multer");
 const app = express();
 const port = 1337;
 
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(helmet());
-app.use(mongoSanitize());
+
+// Serve uploaded images statically
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+// Multer setup for image uploads
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "uploads/");
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
+  },
+});
+const upload = multer({ storage });
+
 
 // MongoDB Connection
 mongoose.connect("mongodb://127.0.0.1:27017/BlankTapes", {});
@@ -47,11 +57,8 @@ mongoose.connection.on("error", (err) => {
   console.error("❌ MongoDB connection error:", err);
 });
 
-// --- Product Image Upload Setup ---
-
 
 // --- User APIs ---
-
 // Get all users
 app.get("/api/users", async (req, res) => {
   try {
@@ -118,9 +125,25 @@ app.delete("/api/users/:id", async (req, res) => {
 app.post("/api/signup", async (req, res) => {
   try {
     const { username, email, password } = req.body;
+
+    // Validation
     if (!username || !email || !password) {
       return res.json({ success: false, error: "All fields are required." });
     }
+    // Username: at least 3 chars
+    if (typeof username !== "string" || username.length < 3) {
+      return res.json({ success: false, error: "Username must be at least 3 characters." });
+    }
+    // Email: basic format check
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.json({ success: false, error: "Invalid email format." });
+    }
+    // Password: at least 6 chars
+    if (typeof password !== "string" || password.length < 6) {
+      return res.json({ success: false, error: "Password must be at least 6 characters." });
+    }
+
     const existingUser = await User.findOne({ $or: [{ username }, { email }] });
     if (existingUser) {
       return res.json({ success: false, error: "Username or email already exists." });
@@ -176,6 +199,95 @@ app.post("/api/login", async (req, res) => {
     res.json({ success: false, error: err.message });
   }
 });
+
+
+// --- Product APIs ---
+
+// Helper: Validate product input
+function validateProductInput(body) {
+  const errors = [];
+  if (!body.name || typeof body.name !== "string") errors.push("Name is required.");
+  if (!body.description || typeof body.description !== "string") errors.push("Description is required.");
+  if (!body.price || isNaN(Number(body.price))) errors.push("Price is required and must be a number.");
+  if (!body.category || typeof body.category !== "string") errors.push("Category is required.");
+  if (body.stock === undefined || isNaN(Number(body.stock))) errors.push("Stock is required and must be a number.");
+  if (!body.status || typeof body.status !== "string") errors.push("Status is required.");
+  return errors;
+}
+
+// Get all products
+app.get("/api/products", async (req, res) => {
+  try {
+    const products = await Product.find().sort({ createdAt: -1 });
+    res.json(products);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Create product with image upload
+app.post("/api/products", multer({ storage }).single("image"), async (req, res) => {
+  const { name, price, description, category, stock, status } = req.body;
+  const errors = validateProductInput(req.body);
+  if (errors.length > 0) {
+    return res.status(400).json({ errors });
+  }
+  try {
+    const imageUrl = req.file ? `/uploads/${req.file.filename}` : "";
+    const product = new Product({
+      name,
+      price,
+      description,
+      imageUrl,
+      category,
+      stock,
+      status,
+      createdAt: new Date()
+    });
+    await product.save();
+    res.json({ success: true, product });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// Update product (optionally with image)
+app.put("/api/products/:id", multer({ storage }).single("image"), async (req, res) => {
+  const errors = validateProductInput({ ...req.body });
+  if (errors.length > 0) {
+    return res.status(400).json({ errors });
+  }
+  try {
+    const updateData = { ...req.body };
+    if (req.file) {
+      updateData.imageUrl = `/uploads/${req.file.filename}`;
+    }
+    const updated = await Product.findByIdAndUpdate(
+      req.params.id,
+      updateData,
+      { new: true }
+    );
+    if (!updated) return res.status(404).json({ error: "Product not found." });
+    res.json({ success: true, product: updated });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// Delete product
+app.delete("/api/products/:id", async (req, res) => {
+  if (!req.params.id) {
+    return res.status(400).json({ error: "Product ID is required." });
+  }
+  try {
+    await Product.findByIdAndDelete(req.params.id);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+
 
 // --- Start Server ---
 app.listen(port, () => {

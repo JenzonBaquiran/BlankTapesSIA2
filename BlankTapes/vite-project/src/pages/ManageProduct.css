@@ -1,13 +1,14 @@
 /* Container for the whole user management page */
 .user-management-container {
   margin-left: 270px;
-  padding: 40px 24px;
-  background: #f7f9fb;
-  min-height: 100vh;
+  padding: 80px 200px;
+  min-height: 100vh;  
   color: #000;
+  flex: 1;
+  width: 100%;
 }
 
-/* Header */
+
 .user-management-header {
   display: flex;
   align-items: center;
@@ -18,7 +19,7 @@
 .user-management-title {
   font-size: 2rem;
   font-weight: 700;
-  color: #222b45;
+  color:#151515;
 }
 
 .add-user-btn {
@@ -34,10 +35,10 @@
 }
 
 .add-user-btn:hover {
-  background: #222;
+  background: #313131;
 }
 
-/* Filters/Search */
+
 .user-filters-container {
   background: #fff;
   border-radius: 12px;
@@ -68,63 +69,59 @@
   background: #f7f9fb;
 }
 
-/* Table container: rounded, shadow, white background */
+
 .user-table-container {
   background: #fff;
-  border-radius: 18px;
-  box-shadow: 0 5px 16px rgba(16,30,54,0.08);
-  padding: 32px 24px;
-  margin-top: 24px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(16,30,54,0.06);
+  padding: 24px;
+  /* Set a max-width and center the table container */
+  max-width: 1200px;
+  margin: 0 auto;
+  overflow-x: auto;
 }
 
-/* Table: remove background, keep spacing */
 .user-table {
   width: 100%;
+  min-width: 900px; /* Ensures columns don't get too squished on small screens */
   border-collapse: collapse;
-  background: transparent;
+  background: #fff;
 }
 
-/* Table headers: bold, black, no background, center */
+.user-table th, .user-table td {
+  padding: 12px 16px;
+  text-align: left;
+}
+
 .user-table th {
   color: #000;
-  font-weight: 700;
-  background: none;
-  font-size: 1.08rem;
-  padding-bottom: 14px;
-  letter-spacing: 0.02em;
+  font-weight: 600;
+  background: #ffffff;
   text-align: center;
 }
 
-/* Table cells: normal text, spacing, center */
-.user-table td {
-  color: #000;
-  font-size: 1rem;
-  padding: 14px 16px;
-  vertical-align: middle;
-  text-align: center;
-  white-space: nowrap;
-}
-
-/* Align product cell (image + name) horizontally */
-.user-table td:first-child {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  justify-content: flex-start;
-  text-align: left;
-  white-space: normal;
-}
-
-/* Row borders: subtle */
 .user-table tr {
   border-bottom: 1px solid #f0f1f7;
   transition: background 0.18s;
 }
+
 .user-table tr:last-child {
   border-bottom: none;
 }
+
 .user-table tr:hover {
   background: #f5f5f5;
+}
+
+
+/* User avatar */
+.user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 12px;
+  vertical-align: middle;
 }
 
 /* Role & Status badges */
@@ -137,69 +134,70 @@
   color: #fff;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  background: #2563eb;
 }
+
 .role-badge.admin {
-  background: #2563eb;
+   background: #151515;
 }
 .role-badge.staff {
-  background: #f59e1b;
+ background: #151515;
 }
 .role-badge.customer {
-  background: #6b7280;
+   background: #151515;
 }
 
 .status-badge {
   display: inline-block;
-  padding: 4px 18px;
-  border-radius: 16px;
-  font-size: 0.98rem;
+  padding: 2px 14px;
+  border-radius: 12px;
+  font-size: 0.95rem;
   font-weight: 700;
-  color: #22c55e;
-  background: #e7fbe9;
+  color: #ffffff;
+  background: #151515;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  box-shadow: none;
-  border: none;
 }
 .status-badge.inactive {
-  background: #fdeaea;
-  color: #ef4444;
+  color: #ffffff !important;
+  background: #151515 !important;
 }
 
 /* Actions */
 .user-actions {
   display: flex;
   gap: 10px;
-  justify-content: center;
 }
 
+.user-table th,
+.user-table td {
+  text-align: center;
+  vertical-align: middle;
+}
 .action-btn {
   border: none;
-  background: #151515;
-  color: #fff;
+  background: none;
   cursor: pointer;
-  padding: 7px 10px;
-  border-radius: 8px;
+  padding: 6px;
+  border-radius: 6px;
   transition: background 0.15s;
-  font-size: 1.15rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  font-size: 1.1rem;
+  padding: 8px 12px;
 }
+
 .action-btn.edit {
-  background: #151515;
-  color: #fff;
+  color: #ffffff;
+    background: #151515;
 }
 .action-btn.edit:hover {
-  background: #222;
+    background: #151515;
 }
+
 .action-btn.delete {
+  color: #ffffff;
   background: #151515;
-  color: #fff;
 }
 .action-btn.delete:hover {
-  background: #222;
+  background: #151515;
 }
 
 /* Modal */
@@ -238,8 +236,7 @@
 }
 
 .user-modal-form input,
-.user-modal-form select,
-.user-modal-form textarea {
+.user-modal-form select {
   width: 100%;
   padding: 10px 14px;
   border: 1px solid #e4e9f2;
@@ -269,7 +266,7 @@
 }
 
 .user-modal-cancel:hover {
-  background: #222;
+  background: #313131;
 }
 
 .user-modal-submit {
@@ -285,5 +282,5 @@
 }
 
 .user-modal-submit:hover {
-  background: #222;
+  background: #3a3a3a;
 }
