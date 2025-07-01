@@ -23,6 +23,11 @@ function Login() {
         setError(data.error || "Login failed.")
         return
       }
+      // Check if user is inactive
+      if (data.user.status && data.user.status.toLowerCase() === "inactive") {
+        setError("Your account is inactive. Please contact support.")
+        return
+      }
       localStorage.setItem("username", data.user.username)
       // Redirect based on role
       if (data.user.role === "admin") navigate("/admindashboard")
