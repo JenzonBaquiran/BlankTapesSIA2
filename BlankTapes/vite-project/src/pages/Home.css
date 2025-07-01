@@ -1,8 +1,30 @@
 .banner-bg {
   position: fixed;
   height: 700px;
-top: -1px;
-  width: 120vw;
-  left: -120px;
+  top: -1px;
+  width: 100%;
+  min-height: 100%;
+  left: 0;
   background: url('../img/banner.png') center center/cover no-repeat;
+  background-size: cover;
+  background-position: center;
+  border-radius: 12px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .home-responsive-container {
+    padding: 0 1vw;
+  }
+  .banner-bg {
+    min-height: 120px;
+    border-radius: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .banner-bg {
+    min-height: 80px;
+    border-radius: 4px;
+  }
 }

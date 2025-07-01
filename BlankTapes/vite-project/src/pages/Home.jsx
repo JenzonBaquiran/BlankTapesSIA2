@@ -7,10 +7,10 @@ import "./Footer.css";
 
 function Home() {
   return (
-    <div>
+    <div className="home-responsive-container">
       <Navbar />
       <div className="banner-bg" style={{ marginTop: "60px", marginBottom: "60px" }}>
-  
+        {/* Add your banner or content here */}
       </div>
       <Footer />
     </div>

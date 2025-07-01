@@ -39,6 +39,7 @@ width: 100%;
   flex: 1;
   display: flex;
   justify-content: center;
+  padding-right: 150px;
 }
 
 .logo-img {

@@ -25,6 +25,7 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 mongoose.connect("mongodb://127.0.0.1:27017/BlankTapes", {});
 mongoose.connection.on("connected", async () => {
   console.log(" Connected to MongoDB");
+
   // Ensure default admin exists
   const admin = await User.findOne({ username: "admin" });
   if (!admin) {
@@ -47,95 +48,7 @@ mongoose.connection.on("error", (err) => {
 });
 
 // --- Product Image Upload Setup ---
-const uploadDir = path.join(__dirname, "uploads");
-if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, uploadDir),
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    cb(null, `${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`);
-  }
-});
-const upload = multer({ storage });
-
-// --- Add Product ---
-app.post("/api/products", upload.single("image"), async (req, res) => {
-  try {
-    const { name, description, category, price, stock, status } = req.body;
-    if (!name || !description || !category || !price || !stock) {
-      return res.status(400).json({ error: "All fields are required." });
-    }
-    const product = new Product({
-      name,
-      description,
-      category,
-      price,
-      stock,
-      status,
-      imageUrl: req.file ? `/uploads/${req.file.filename}` : ""
-    });
-    await product.save();
-    res.json(product);
-  } catch (err) {
-    res.status(400).json({ error: err.message });
-  }
-});
-
-// --- Edit Product ---
-app.put("/api/products/:id", upload.single("image"), async (req, res) => {
-  try {
-    const { name, description, category, price, stock, status } = req.body;
-    const update = { name, description, category, price, stock, status };
-    if (req.file) update.imageUrl = `/uploads/${req.file.filename}`;
-    const product = await Product.findByIdAndUpdate(req.params.id, update, { new: true });
-    if (!product) return res.status(404).json({ error: "Product not found." });
-    res.json(product);
-  } catch (err) {
-    res.status(400).json({ error: err.message });
-  }
-});
-
-// --- Mark Product as Out of Stock (Soft Delete) ---
-app.put("/api/products/:id/out_of_stock", async (req, res) => {
-  try {
-    const product = await Product.findByIdAndUpdate(
-      req.params.id,
-      { status: "out_of_stock" },
-      { new: true }
-    );
-    if (!product) return res.status(404).json({ error: "Product not found." });
-    res.json(product);
-  } catch (err) {
-    res.status(400).json({ error: err.message });
-  }
-});
-
-// --- Delete Product (Hard Delete) ---
-app.delete("/api/products/:id", async (req, res) => {
-  try {
-    const product = await Product.findByIdAndDelete(req.params.id);
-    if (!product) return res.status(404).json({ error: "Product not found." });
-    // Optionally delete image file
-    if (product.imageUrl && product.imageUrl.startsWith("/uploads/")) {
-      const imgPath = path.join(__dirname, product.imageUrl);
-      if (fs.existsSync(imgPath)) fs.unlinkSync(imgPath);
-    }
-    res.json({ success: true });
-  } catch (err) {
-    res.status(400).json({ error: err.message });
-  }
-});
-
-// --- Get All Products ---
-app.get("/api/products", async (req, res) => {
-  try {
-    const products = await Product.find().sort({ createdAt: -1 });
-    res.json(products);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
 
 // --- User APIs ---
 

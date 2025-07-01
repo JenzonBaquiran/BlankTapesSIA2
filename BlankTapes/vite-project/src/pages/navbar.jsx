@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
 import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
+import PersonIcon from "@mui/icons-material/Person";
 import "./Navbar.css";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -25,6 +26,8 @@ const Navbar = ({ onCartClick, cartCount }) => {
     setShowAccount(false);
     navigate("/");
   };
+
+  const username = localStorage.getItem("username");
 
   return (
     <>
@@ -63,6 +66,7 @@ const Navbar = ({ onCartClick, cartCount }) => {
             onClick={() => setShowAccount(true)}
           />
         </div>
+       
       </nav>
       {showAccount && (
         <div className="account-modal-overlay" onClick={() => setShowAccount(false)}>
@@ -98,10 +102,10 @@ const Navbar = ({ onCartClick, cartCount }) => {
             >
               ×
             </button>
-            {user ? (
+            {username ? (
               <>
                 <div style={{ marginBottom: 16, marginTop: 12 }}>
-                  <b>Logged in as:</b> {user.username}
+                  <b>Logged in as:</b> {username}
                 </div>
                 <button onClick={handleLogout} style={{
                   background: "#151515",

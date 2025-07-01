@@ -17,7 +17,7 @@ function AdminSidebar() {
   const handleLogout = () => {
     console.log("User logged out");
     setOpenAddModalSidebarLogout(false);
-    navigate('/product');
+    navigate('/');
   };
 
   return (
