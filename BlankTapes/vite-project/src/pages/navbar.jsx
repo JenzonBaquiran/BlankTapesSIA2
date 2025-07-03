@@ -36,7 +36,7 @@ const Navbar = ({ onCartClick, cartCount }) => {
           <Link to="/home">HOME</Link>
           <Link to="/product">PRODUCTS</Link>
           <Link to="/customerorder">ORDERS</Link>
-          <Link to="/about">ABOUT US</Link>
+          <Link to="/myaccount">MY ACCOUNT</Link>
         </div>
         <div className="navbar-section navbar-logo">
           <Link to="/home">

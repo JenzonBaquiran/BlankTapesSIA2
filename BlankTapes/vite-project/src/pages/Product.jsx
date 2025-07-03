@@ -147,27 +147,49 @@ function Product() {
                 </div>
                 <button
                   className="secure-checkout-btn"
-                  onClick={() => {
-                    // Prepare new order object(s)
-                    const now = new Date();
-                    const orderId = `BT-${now.getFullYear()}-${Math.floor(Math.random() * 900 + 100)}`;
-                    const newOrder = {
-                      id: orderId,
-                      date: now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
-                      items: cart.reduce((sum, item) => sum + item.quantity, 0),
-                      status: "Pending",
-                      price: `₱${cartTotal.toLocaleString()} PHP`,
-                      tracking: "BT" + Math.floor(Math.random() * 1000000000),
-                      img: cart[0]?.img || "",
+                  onClick={async () => {
+                    const username = localStorage.getItem("username");
+                    if (!username) {
+                      alert("Please log in to checkout.");
+                      return;
+                    }
+                    // Fetch user details for name/email
+                    const users = await fetch("http://localhost:1337/api/users").then(r => r.json());
+                    const user = users.find(u => u.username === username);
+                    if (!user) {
+                      alert("User not found.");
+                      return;
+                    }
+                    // Prepare order payload
+                    const orderPayload = {
+                      customer: {
+                        name: user.username,
+                        email: user.email,
+                      },
+                      items: cart.map(item => ({
+                        productId: item.key.split("-")[0], // assuming _id is in key
+                        name: item.name,
+                        quantity: item.quantity,
+                        price: Number(item.price),
+                        size: item.size,
+                        img: item.img,
+                      })),
+                      total: cartTotal,
+                      status: "PENDING",
                     };
-                    // Get existing orders from localStorage
-                    const existingOrders = JSON.parse(localStorage.getItem("customerOrders") || "[]");
-                    // Add new order
-                    localStorage.setItem("customerOrders", JSON.stringify([newOrder, ...existingOrders]));
-                    // Optionally clear cart
-                    setCart([]);
-                    // Redirect to CustomerOrder page
-                    window.location.href = "/customerorder";
+                    // Send to backend
+                    const res = await fetch("http://localhost:1337/api/orders", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify(orderPayload),
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                      setCart([]);
+                      window.location.href = "/customerorder";
+                    } else {
+                      alert("Checkout failed: " + (data.error || "Unknown error"));
+                    }
                   }}
                 >
                   Secure Checkout

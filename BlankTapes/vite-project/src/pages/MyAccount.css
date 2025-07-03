@@ -1,0 +1,140 @@
+.my-account-dashboard {
+  width: 1200px !important; /* Increased from 800px */
+  padding: 50px;     /* Slightly more padding for a larger look */
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  font-family: Arial, sans-serif;
+  margin-top: 90px;
+  height: 100%;
+}
+
+.dashboard-section {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.balance-card, .details-card {
+  flex: 1;
+  background: #f7f7f7;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.balance-amount {
+  font-size: 2rem;
+  color: #2e7d32;
+  margin: 12px 0 0 0;
+}
+
+.details-card form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.details-card label {
+  display: flex;
+  flex-direction: column;
+  font-weight: 500;
+}
+
+.details-card input {
+  padding: 6px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.details-card button,
+.details-card button[type="submit"] {
+  margin-top: 8px;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 4px;
+  background: #1976d2;
+  color: #fff;
+  cursor: pointer;
+}
+
+
+
+.details-card > div > button {
+  background: #111;
+  color: #fff;
+}
+
+.transactions-card {
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.transactions-card table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.transactions-card th, .transactions-card td {
+  padding: 8px 12px;
+  border-bottom: 1px solid #ddd;
+  text-align: center;
+}
+
+.transactions-card th {
+  background: #e3e3e3;
+}
+
+.transactions-card tr:last-child td {
+  border-bottom: none;
+}
+
+.summary-cards {
+  display: flex;
+  gap: 32px;
+  justify-content: center;
+  margin-bottom: 32px;
+}
+
+.summary-card {
+  background: #fff; 
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  padding: 32px 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 170px;
+  transition: transform 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+}
+
+.summary-card:hover {
+  transform: translateY(-6px) scale(1.04);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+
+}
+
+.summary-icon {
+  font-size: 2.5rem;
+  margin-bottom: 8px;
+}
+
+.summary-value {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.summary-label {
+  font-size: 1rem;
+  color: #444;
+}
+
+.status-badge {
+  background: #222;
+  color: #fff;
+  border-radius: 16px;
+  padding: 4px 16px;
+  font-weight: 700;
+  font-size: 14px;
+  display: inline-block;
+}

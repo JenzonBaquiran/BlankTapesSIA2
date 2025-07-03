@@ -9,6 +9,9 @@ import InventoryIcon from '@mui/icons-material/Inventory';
 function AdminDashboard() {
   const [totalUsers, setTotalUsers] = useState(0);
   const [totalProducts, setTotalProducts] = useState(0);
+  const [totalOrders, setTotalOrders] = useState(0);
+  const [recentOrders, setRecentOrders] = useState([]);
+  const [totalRevenue, setTotalRevenue] = useState(0);
 
   useEffect(() => {
     fetch("http://localhost:1337/api/users")
@@ -20,6 +23,23 @@ function AdminDashboard() {
       .then(res => res.json())
       .then(data => setTotalProducts(data.length))
       .catch(() => setTotalProducts(0));
+
+    fetch("http://localhost:1337/api/orders")
+      .then(res => res.json())
+      .then(data => {
+        setTotalOrders(data.length);
+        setRecentOrders(data.slice(0, 3)); // latest 3 orders
+        // Calculate total revenue from delivered orders
+        const revenue = data
+          .filter(order => order.status === "DELIVERED")
+          .reduce((sum, order) => sum + (order.total || 0), 0);
+        setTotalRevenue(revenue);
+      })
+      .catch(() => {
+        setTotalOrders(0);
+        setRecentOrders([]);
+        setTotalRevenue(0);
+      });
   }, []);
 
   return (
@@ -38,7 +58,7 @@ function AdminDashboard() {
           <div className="dashboard-card orders">
             <div className="icon"><ShoppingCartIcon /></div>
             <div>
-              <div className="card-value">4</div>
+              <div className="card-value">{totalOrders}</div>
               <div className="card-label">Total Orders</div>
             </div>
           </div>
@@ -52,7 +72,7 @@ function AdminDashboard() {
           <div className="dashboard-card revenue">
             <div className="icon"><AttachMoneyIcon /></div>
             <div>
-              <div className="card-value">₱21,200</div>
+              <div className="card-value">₱{totalRevenue.toLocaleString()}</div>
               <div className="card-label">Total Revenue</div>
             </div>
           </div>
@@ -71,27 +91,22 @@ function AdminDashboard() {
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td>ORD-001</td>
-                  <td>Mike Customer</td>
-                  <td>₱8,400</td>
-                  <td><span className="status processing">PROCESSING</span></td>
-                  <td>12/18/2024</td>
-                </tr>
-                <tr>
-                  <td>ORD-002</td>
-                  <td>Emma Wilson</td>
-                  <td>₱2,800</td>
-                  <td><span className="status shipped">SHIPPED</span></td>
-                  <td>12/17/2024</td>
-                </tr>
-                <tr>
-                  <td>ORD-003</td>
-                  <td>David Brown</td>
-                  <td>₱4,400</td>
-                  <td><span className="status delivered">DELIVERED</span></td>
-                  <td>12/15/2024</td>
-                </tr>
+                {recentOrders.map(order => (
+                  <tr key={order.orderId || order._id}>
+                    <td>{order.orderId || order._id}</td>
+                    <td>{order.customer?.name}</td>
+                    <td>₱{(order.total || 0).toLocaleString()}</td>
+                    <td>
+                      <span className={`status ${order.status?.toLowerCase()}`}>{order.status}</span>
+                    </td>
+                    <td>{order.date ? new Date(order.date).toLocaleDateString() : ""}</td>
+                  </tr>
+                ))}
+                {recentOrders.length === 0 && (
+                  <tr>
+                    <td colSpan={5} style={{ textAlign: "center", color: "#888" }}>No recent orders.</td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>

@@ -12,13 +12,15 @@ const OrderSchema = new mongoose.Schema(
         productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: true },
         name: { type: String, required: true },
         quantity: { type: Number, required: true },
-        price: { type: Number, required: true }
+        price: { type: Number, required: true },
+        img: { type: String } ,
+         size: { type: String }
       }
     ],
     total: { type: Number, required: true },
     status: { 
       type: String, 
-      enum: ['PROCESSING', 'SHIPPED', 'DELIVERED', 'PENDING'], 
+      enum: ['PROCESSING', 'SHIPPED', 'DELIVERED', 'PENDING', 'CANCELLED'], // Add CANCELLED if needed
       default: 'PENDING', 
       uppercase: true 
     },

@@ -13,6 +13,7 @@ import StaffManageProduct from "./pages/StaffManageProduct";
 import StaffManageOrder from "./pages/StaffManageOrder";
 import StaffSidebar from "./pages/StaffSidebar";
 import CustomerOrder from "./pages/CustomerOrder";
+import MyAccount from "./pages/MyAccount";
 
 
 function App() {
@@ -32,6 +33,7 @@ function App() {
       <Route path="/staffmanageorder" element={<StaffManageOrder />} />
       <Route path="/staffsidebar" element={<StaffSidebar />} />
       <Route path="/customerorder" element={<CustomerOrder />} />
+      <Route path="/myaccount" element={<MyAccount />} />
 
       </Routes>
     </BrowserRouter>

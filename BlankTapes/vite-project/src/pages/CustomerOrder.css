@@ -140,6 +140,11 @@
   background: #151515;
   color: #fff;
 }
+.order-status.cancelled {
+  background: #151515 !important;
+  color: #fff !important;
+  font-size: medium;
+}
 
 /* Responsive: 2 columns on medium, 1 on small screens */
 @media (max-width: 1000px) {
@@ -168,12 +173,6 @@
   min-width: 150px;
   box-shadow: 0 2px 8px 0 rgba(0,0,0,0.04);
 }
-
-
-
-
-
-
 
 /* --- PAGE BACKGROUND --- */
 
@@ -408,21 +407,41 @@
 
 
 .cancel-order-btn {
-  /* Remove block and width for inline placement */
   display: inline-block;
-  width: auto;         /* Let it size to content */
-  max-width: none;
-  margin-left: 18px;    /* Space from status */
-  margin-right: 0;
-  margin-top: 12px;     /* Lower it a bit below the status */
-  vertical-align: top;  /* Align with status */
   background: #151515;
   color: #fff;
   border: none;
-  padding: 10px 30px;
-  border-radius: 8px;
+  border-radius: 6px;
+  padding: 12px 20px;
+  font-weight: 700;
+  font-size: 1.1rem;
   cursor: pointer;
+  transition: background 0.2s;
 }
 .cancel-order-btn:hover {
+  background: #202020;
+}
+
+.pay-btn-container {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+  margin: 32px 0 0 0;
+  margin-right: 50px;
+}
+
+.pay-btn {
+  background: #000000;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 12px 32px;
+  font-weight: 700;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.pay-btn:hover {
   background: #202020;
 }

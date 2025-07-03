@@ -288,6 +288,70 @@ app.delete("/api/products/:id", async (req, res) => {
 });
 
 
+// --- Orders API ---
+// Create new order
+app.post("/api/orders", async (req, res) => {
+  try {
+    const { customer, items, total, status } = req.body;
+    if (!customer || !items || !total) {
+      return res.status(400).json({ error: "Missing order data." });
+    }
+    // Generate unique orderId
+    const orderId = `BT-${new Date().getFullYear()}-${Math.floor(Math.random() * 900 + 100)}`;
+    const order = new Order({
+      orderId,
+      customer,
+      items,
+      total,
+      status: status || "PENDING",
+      date: new Date(),
+    });
+    await order.save();
+    res.json({ success: true, order });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// Get orders for logged-in customer (by username/email)
+app.get("/api/orders/customer/:username", async (req, res) => {
+  try {
+    const users = await User.find({ username: req.params.username });
+    if (!users.length) return res.json([]);
+    const user = users[0];
+    const orders = await Order.find({ "customer.email": user.email }).sort({ date: -1 });
+    res.json(orders);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// Get all orders (for admin/staff)
+app.get("/api/orders", async (req, res) => {
+  try {
+    const orders = await Order.find().sort({ date: -1 });
+    res.json(orders);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// Update order status (admin/staff)
+app.put("/api/orders/:orderId", async (req, res) => {
+  try {
+    const { status } = req.body;
+    const order = await Order.findOneAndUpdate(
+      { orderId: req.params.orderId },
+      { status },
+      { new: true }
+    );
+    if (!order) return res.status(404).json({ error: "Order not found." });
+    res.json({ success: true, order });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
 
 // --- Start Server ---
 app.listen(port, () => {

@@ -11,6 +11,9 @@ function Home() {
       <Navbar />
       <div className="banner-bg" style={{ marginTop: "60px", marginBottom: "60px" }}>
         {/* Add your banner or content here */}
+        <div className="banner-content">
+          SAMPLE LOOK
+        </div>
       </div>
       <Footer />
     </div>
