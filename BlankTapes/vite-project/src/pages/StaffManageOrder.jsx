@@ -58,6 +58,15 @@ function StaffManageOrder() {
     setEditOrder(null);
   };
 
+  // Delete order
+  const handleDeleteOrder = async (orderId) => {
+    if (!window.confirm("Are you sure you want to delete this order?")) return;
+    await fetch(`http://localhost:1337/api/orders/${orderId}`, {
+      method: "DELETE",
+    });
+    setOrders(orders => orders.filter(order => (order.orderId || order.id) !== orderId));
+  };
+
   return (
     <>
       <StaffSidebar />
@@ -141,7 +150,11 @@ function StaffManageOrder() {
                       <button
                         className="action-btn delete"
                         title="Delete"
-                        onClick={() => alert('Delete not implemented')}
+                        onClick={() => {
+                          if (window.confirm("Are you sure you want to delete this order?")) {
+                            handleDeleteOrder(order.orderId || order.id);
+                          }
+                        }}
                       >
                         <DeleteIcon />
                       </button>

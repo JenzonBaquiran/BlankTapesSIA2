@@ -352,6 +352,17 @@ app.put("/api/orders/:orderId", async (req, res) => {
   }
 });
 
+// Delete order
+app.delete("/api/orders/:orderId", async (req, res) => {
+  try {
+    const order = await Order.findOneAndDelete({ orderId: req.params.orderId });
+    if (!order) return res.status(404).json({ error: "Order not found." });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
 
 // --- Start Server ---
 app.listen(port, () => {

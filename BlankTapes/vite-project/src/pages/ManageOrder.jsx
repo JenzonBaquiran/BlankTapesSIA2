@@ -15,8 +15,6 @@ const ORDER_STATUS = [
   'Cancelled',
 ];
 
-
-
 function getOrderTotal(items) {
   return items.reduce((sum, item) => sum + (item.quantity || item.qty) * item.price, 0);
 }
@@ -58,6 +56,14 @@ function ManageOrder() {
       )
     );
     setEditOrder(null);
+  };
+
+  // Delete order
+  const handleDeleteOrder = async (orderId) => {
+    await fetch(`http://localhost:1337/api/orders/${orderId}`, {
+      method: 'DELETE',
+    });
+    setOrders(orders => orders.filter(order => (order.orderId || order.id) !== orderId));
   };
 
   return (
@@ -137,7 +143,11 @@ function ManageOrder() {
                       <button
                         className="action-btn delete"
                         title="Delete"
-                        onClick={() => alert('Delete not implemented')}
+                        onClick={() => {
+                          if (window.confirm("Are you sure you want to delete this order?")) {
+                            handleDeleteOrder(order.orderId || order.id);
+                          }
+                        }}
                       >
                         <DeleteIcon />
                       </button>
