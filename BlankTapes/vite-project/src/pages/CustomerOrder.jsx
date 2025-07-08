@@ -55,7 +55,7 @@ function CustomerOrder() {
 
   const handleCancelOrder = async () => {
     // Update status in backend
-    await fetch(`${API_BASE}/orders/${selectedOrder.id}`, {
+    await fetch(`${API_BASE}/api/orders/${selectedOrder.id}`, { // <-- add /api
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status: 'Cancelled' }),
@@ -97,7 +97,11 @@ function CustomerOrder() {
                   {order.date} &nbsp; <span role="img" aria-label="item">📦</span> {order.items} item{order.items > 1 ? "s" : ""}
                 </div>
               </div>
-              <span className={`order-status shipped`}>{order.status}</span>
+              <span
+                className={`order-status ${order.status === "Cancelled" ? "cancelled" : "shipped"}`}
+              >
+                {order.status}
+              </span>
             </div>
             <div className="order-summary-body">
               <img src={order.img} alt="Product" className="item-img" />
