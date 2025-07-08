@@ -7,6 +7,7 @@ import { useState } from 'react';
 import { Modal, Box, Typography, Button } from '@mui/material';
 import logoWhite from "../img/logowhite.png";
 
+
 function StaffSidebar() {
   const [openAddModalSidebarLogout, setOpenAddModalSidebarLogout] = useState(false);
   const navigate = useNavigate();

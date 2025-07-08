@@ -3,10 +3,11 @@ import './ManageProduct.css';
 import AdminSidebar from '../pages/AdminSidebar';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
+import { API_BASE } from "../config"
 
 
 const categories = ["Hoodies", "Short", "T-Shirts"];
-const API_URL = "http://localhost:1337/api/products";
+const API_URL = `${API_BASE}/api/products`; // <-- add /api
 
 function ManageProduct() {
   const [products, setProducts] = useState([]);
@@ -184,7 +185,7 @@ function ManageProduct() {
                   <td style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     {product.imageUrl && (
                       <img
-                        src={`http://localhost:1337${product.imageUrl}`}
+                        src={`${API_BASE}${product.imageUrl}`}
                         alt={product.name}
                         style={{ width: 40, height: 40, objectFit: 'cover', borderRadius: 6 }}
                       />
@@ -287,7 +288,7 @@ function ManageProduct() {
                   <img
                     src={
                       typeof form.image === "string" && form.image.startsWith('/uploads/')
-                        ? `http://localhost:1337${form.image}`
+                        ? `${API_BASE}${form.image}`
                         : form.image
                     }
                     alt="Preview"

@@ -5,6 +5,7 @@ import Footer from "./Footer.jsx";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import InventoryIcon from "@mui/icons-material/Inventory";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
+import { API_BASE } from "../config"
 
 const statusColors = {
   PROCESSING: "#222",
@@ -27,21 +28,32 @@ export default function MyAccount() {
     const username = localStorage.getItem("username");
     if (!username) return;
 
-    fetch("http://localhost:1337/api/users")
+    const API_URL = `${API_BASE}/api/users/${username}`; // <-- correct endpoint
+    const ORDERS_URL = `${API_BASE}/api/orders/customer/${username}`; // <-- correct endpoint
+
+    // Fetch user details (name and email)
+    fetch(API_URL)
       .then((res) => res.json())
-      .then((users) => {
-        const user = users.find((u) => u.username === username);
-        if (user) {
+      .then((user) => {
+        // If backend returns a single user object
+        if (user && user.username === username) {
           setDetails({
             name: user.username,
             email: user.email,
           });
         }
+        // If backend returns an array of users
+        else if (Array.isArray(user)) {
+          const found = user.find((u) => u.username === username);
+          if (found) setDetails({ name: found.username, email: found.email });
+        }
       })
-      .catch(() => {});
+      .catch(() => {
+        setDetails({ name: "", email: "" });
+      });
 
     // Fetch recent orders for this user
-    fetch(`http://localhost:1337/api/orders/customer/${username}`)
+    fetch(ORDERS_URL)
       .then((res) => res.json())
       .then((data) => {
         setTotalOrders(data.length);
@@ -74,7 +86,7 @@ export default function MyAccount() {
       });
 
     // Fetch total products (optional)
-    fetch("http://localhost:1337/api/products")
+    fetch(`${API_BASE}/api/products`)
       .then((res) => res.json())
       .then((data) => setTotalProducts(data.length))
       .catch(() => setTotalProducts(0));

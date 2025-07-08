@@ -4,6 +4,9 @@ import './ManageOrder.css';
 import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { API_BASE } from "../config"
+
+const API_URL = `${API_BASE}/api/orders`; // <-- add /api
 
 const ORDER_STATUS = [
   'All Status',
@@ -28,7 +31,7 @@ function ManageOrder() {
 
   // Fetch orders from backend
   useEffect(() => {
-    fetch('http://localhost:1337/api/orders')
+    fetch(`${API_BASE}/api/orders`) // <-- fixed endpoint
       .then(res => res.json())
       .then(data => setOrders(data))
       .catch(() => setOrders([]));
@@ -45,7 +48,7 @@ function ManageOrder() {
 
   // Update order status in backend
   const handleStatusUpdate = async (orderId, newStatus) => {
-    await fetch(`http://localhost:1337/api/orders/${orderId}`, {
+    await fetch(`${API_BASE}/api/orders/${orderId}`, { // <-- fixed endpoint
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status: newStatus }),
@@ -60,7 +63,7 @@ function ManageOrder() {
 
   // Delete order
   const handleDeleteOrder = async (orderId) => {
-    await fetch(`http://localhost:1337/api/orders/${orderId}`, {
+    await fetch(`${API_BASE}/api/orders/${orderId}`, { // <-- fixed endpoint
       method: 'DELETE',
     });
     setOrders(orders => orders.filter(order => (order.orderId || order.id) !== orderId));

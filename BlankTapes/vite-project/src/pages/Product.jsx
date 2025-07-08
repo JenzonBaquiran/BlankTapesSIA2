@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import './Product.css';
 import Navbar from "./Navbar.jsx";
 import Footer from "./Footer.jsx";
+import { API_BASE } from "../config"
+
+const API_URL = `${API_BASE}/api/products`; // <-- add /api
 
 function Product() {
   const [products, setProducts] = useState([]);
@@ -14,7 +17,7 @@ function Product() {
 
   // Fetch products from backend and only show active ones (case-insensitive)
   useEffect(() => {
-    fetch('http://localhost:1337/api/products')
+    fetch(API_URL) // Use the correct API endpoint
       .then(res => res.json())
       .then(data => {
         setProducts(data.filter(p => (p.status || '').toLowerCase() === 'active'));
@@ -69,7 +72,7 @@ function Product() {
             name: selectedProduct.name,
             img: selectedProduct.imageUrl
               ? selectedProduct.imageUrl.startsWith('/uploads/')
-                ? `http://localhost:1337${selectedProduct.imageUrl}`
+                ? `${API_BASE}${selectedProduct.imageUrl}`
                 : selectedProduct.imageUrl
               : '/default-image.png',
             price: selectedProduct.price,
@@ -154,7 +157,7 @@ function Product() {
                       return;
                     }
                     // Fetch user details for name/email
-                    const users = await fetch("http://localhost:1337/api/users").then(r => r.json());
+                    const users = await fetch(`${API_BASE}/api/users`).then(r => r.json());
                     const user = users.find(u => u.username === username);
                     if (!user) {
                       alert("User not found.");
@@ -178,7 +181,7 @@ function Product() {
                       status: "PENDING",
                     };
                     // Send to backend
-                    const res = await fetch("http://localhost:1337/api/orders", {
+                    const res = await fetch(`${API_BASE}/api/orders`, {
                       method: "POST",
                       headers: { "Content-Type": "application/json" },
                       body: JSON.stringify(orderPayload),
@@ -229,7 +232,7 @@ function Product() {
                 src={
                   product.imageUrl
                     ? product.imageUrl.startsWith('/uploads/')
-                      ? `http://localhost:1337${product.imageUrl}`
+                      ? `${API_BASE}${product.imageUrl}` // Use API_BASE for images
                       : product.imageUrl
                     : '/default-image.png'
                 }
@@ -256,7 +259,7 @@ function Product() {
                   src={
                     selectedProduct.imageUrl
                       ? selectedProduct.imageUrl.startsWith('/uploads/')
-                        ? `http://localhost:1337${selectedProduct.imageUrl}`
+                        ? `${API_BASE}${selectedProduct.imageUrl}` // Use API_BASE for images
                         : selectedProduct.imageUrl
                       : '/default-image.png'
                   }

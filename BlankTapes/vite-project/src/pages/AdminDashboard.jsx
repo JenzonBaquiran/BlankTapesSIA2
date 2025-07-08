@@ -5,6 +5,7 @@ import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import PersonIcon from '@mui/icons-material/Person';
 import InventoryIcon from '@mui/icons-material/Inventory';
+import { API_BASE } from "../config"
 
 function AdminDashboard() {
   const [totalUsers, setTotalUsers] = useState(0);
@@ -14,17 +15,17 @@ function AdminDashboard() {
   const [totalRevenue, setTotalRevenue] = useState(0);
 
   useEffect(() => {
-    fetch("http://localhost:1337/api/users")
+    fetch(`${API_BASE}/api/users`) // <-- fixed endpoint
       .then(res => res.json())
       .then(data => setTotalUsers(data.length))
       .catch(() => setTotalUsers(0));
 
-    fetch("http://localhost:1337/api/products")
+    fetch(`${API_BASE}/api/products`) // <-- fixed endpoint
       .then(res => res.json())
       .then(data => setTotalProducts(data.length))
       .catch(() => setTotalProducts(0));
 
-    fetch("http://localhost:1337/api/orders")
+    fetch(`${API_BASE}/api/orders`) // <-- fixed endpoint
       .then(res => res.json())
       .then(data => {
         setTotalOrders(data.length);

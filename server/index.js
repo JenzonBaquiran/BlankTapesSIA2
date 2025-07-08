@@ -9,7 +9,7 @@ const bcrypt = require("bcryptjs");
 const fs = require("fs");
 const multer = require("multer");
 const app = express();
-const port = 1337;
+const port = 5000;
 
 // Middleware
 app.use(cors());
@@ -32,9 +32,9 @@ const upload = multer({ storage });
 
 
 // MongoDB Connection
-mongoose.connect("mongodb://127.0.0.1:27017/BlankTapes", {});
+mongoose.connect("mongodb+srv://baquiranjenzon:Jenzon0108@cluster0.0jgld8f.mongodb.net/", {});
 mongoose.connection.on("connected", async () => {
-  console.log(" Connected to MongoDB");
+ console.log(" Connected to Atlas MongoDB");
 
   // Ensure default admin exists
   const admin = await User.findOne({ username: "admin" });
@@ -200,6 +200,12 @@ app.post("/api/login", async (req, res) => {
   }
 });
 
+// Get user by username
+app.get('/api/users/:username', async (req, res) => {
+  const user = await User.findOne({ username: req.params.username });
+  if (!user) return res.status(404).json({ error: 'User not found' });
+  res.json(user);
+});
 
 // --- Product APIs ---
 
@@ -365,6 +371,6 @@ app.delete("/api/orders/:orderId", async (req, res) => {
 
 
 // --- Start Server ---
-app.listen(port, () => {
-  console.log(` Server running at http://localhost:${port}`);
+app.listen(port, "0.0.0.0", () => {
+  console.log(` Server running at http://0.0.0.0:${port}`);
 });

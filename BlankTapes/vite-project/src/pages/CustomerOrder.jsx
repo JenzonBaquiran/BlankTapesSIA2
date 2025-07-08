@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Navbar from "./Navbar.jsx";
 import Footer from "./Footer.jsx";
 import './CustomerOrder.css';
+import { API_BASE } from "../config"
 
 const statusOptions = [
   "All Orders",
@@ -23,7 +24,8 @@ function CustomerOrder() {
   useEffect(() => {
     const username = localStorage.getItem("username");
     if (!username) return;
-    fetch(`http://localhost:1337/api/orders/customer/${username}`)
+    const API_URL = `${API_BASE}/api/orders/customer/${username}`; // <-- add /api
+    fetch(API_URL)
       .then(res => res.json())
       .then(data => {
         // Map backend orders to UI format
@@ -37,7 +39,7 @@ function CustomerOrder() {
             tracking: order.orderId || order._id,
             img: order.items?.[0]?.img
               ? order.items[0].img.startsWith('/uploads/')
-                ? `http://localhost:1337${order.items[0].img}`
+                ? `${API_BASE}${order.items[0].img}`
                 : order.items[0].img
               : "https://i.imgur.com/2nCt3Sbl.jpg",
             details: order.items || [],
@@ -53,7 +55,7 @@ function CustomerOrder() {
 
   const handleCancelOrder = async () => {
     // Update status in backend
-    await fetch(`http://localhost:1337/api/orders/${selectedOrder.id}`, {
+    await fetch(`${API_BASE}/orders/${selectedOrder.id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status: 'Cancelled' }),
@@ -170,7 +172,7 @@ function CustomerOrder() {
                     src={
                       item.img
                         ? item.img.startsWith('/uploads/')
-                          ? `http://localhost:1337${item.img}`
+                          ? `${API_BASE}${item.img}`
                           : item.img
                         : "https://i.imgur.com/2nCt3Sbl.jpg"
                     }

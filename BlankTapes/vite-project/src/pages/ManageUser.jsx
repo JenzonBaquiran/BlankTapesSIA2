@@ -4,7 +4,7 @@ import './AdminDashboard.css';
 import './ManageUser.css';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-
+import { API_BASE } from "../config"
 
 function ManageUser() {
   const [users, setUsers] = useState([]);
@@ -15,7 +15,7 @@ function ManageUser() {
 
   // Fetch users from backend
   const fetchUsers = async () => {
-    const res = await fetch("http://localhost:1337/api/users");
+    const res = await fetch(`${API_BASE}/api/users`); // GET users
     const data = await res.json();
     setUsers(data);
   };
@@ -48,7 +48,9 @@ function ManageUser() {
   const closeModal = () => setShowModal(false);
 
   const handleDeleteUser = async (id) => {
-    const res = await fetch(`http://localhost:1337/api/users/${id}`, { method: "DELETE" });
+    const res = await fetch(`${API_BASE}/api/users/${id}`, { // DELETE user
+      method: "DELETE",
+    });
     const data = await res.json();
     if (data.success) {
       fetchUsers();
@@ -61,7 +63,7 @@ function ManageUser() {
     e.preventDefault();
     setFormError("");
     if (modalMode === 'add') {
-      const res = await fetch("http://localhost:1337/api/users", {
+      const res = await fetch(`${API_BASE}/api/users`, { // POST new user
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
@@ -74,7 +76,7 @@ function ManageUser() {
         setFormError(data.error || "Failed to add user.");
       }
     } else if (modalMode === 'edit') {
-      const res = await fetch(`http://localhost:1337/api/users/${form.id}`, {
+      const res = await fetch(`${API_BASE}/api/users/${form._id}`, { // PUT update user
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),

@@ -4,6 +4,7 @@ import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined
 import PersonIcon from "@mui/icons-material/Person";
 import "./Navbar.css";
 import { Link, useNavigate } from "react-router-dom";
+import { API_BASE } from "../config"
 
 const Navbar = ({ onCartClick, cartCount }) => {
   const [showAccount, setShowAccount] = useState(false);
@@ -13,7 +14,7 @@ const Navbar = ({ onCartClick, cartCount }) => {
   // Fetch latest user from backend when modal opens
   useEffect(() => {
     if (showAccount) {
-      fetch("http://localhost:1337/api/latest-user")
+      fetch(`${API_BASE}/latest-user`)
         .then(res => res.json())
         .then(data => setUser(data))
         .catch(() => setUser(null));
@@ -21,7 +22,7 @@ const Navbar = ({ onCartClick, cartCount }) => {
   }, [showAccount]);
 
   const handleLogout = async () => {
-    await fetch("http://localhost:1337/api/logout", { method: "POST" });
+    await fetch(`${API_BASE}/logout`, { method: "POST" });
     setUser(null);
     setShowAccount(false);
     navigate("/");
