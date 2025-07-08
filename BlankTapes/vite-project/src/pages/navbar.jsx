@@ -9,6 +9,7 @@ import { API_BASE } from "../config"
 const Navbar = ({ onCartClick, cartCount }) => {
   const [showAccount, setShowAccount] = useState(false);
   const [user, setUser] = useState(null);
+  const [searchQuery, setSearchQuery] = useState(""); // Add this state
   const navigate = useNavigate();
 
   // Fetch latest user from backend when modal opens
@@ -45,7 +46,13 @@ const Navbar = ({ onCartClick, cartCount }) => {
           </Link>
         </div>
         <div className="navbar-section navbar-actions">
-          <input className="navbar-search" type="text" placeholder="Search" />
+          <input
+            className="navbar-search"
+            type="text"
+            placeholder="Search"
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+          />
           <button
             className="navbar-cart-btn"
             onClick={onCartClick}
@@ -67,7 +74,6 @@ const Navbar = ({ onCartClick, cartCount }) => {
             onClick={() => setShowAccount(true)}
           />
         </div>
-       
       </nav>
       {showAccount && (
         <div className="account-modal-overlay" onClick={() => setShowAccount(false)}>

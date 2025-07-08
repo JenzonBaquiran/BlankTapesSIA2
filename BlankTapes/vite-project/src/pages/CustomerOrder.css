@@ -112,7 +112,7 @@
 
 .view-details-btn {
   margin-left: auto;
-  background: #111827;
+  background: #000000;
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -125,7 +125,7 @@
   transition: background 0.2s;
 }
 .view-details-btn:hover {
-  background: #374151;
+  background: #1d1d1d;
 }
 
 .order-status {
@@ -134,7 +134,7 @@
   font-size: 14px;
   font-weight: 500;
   background: #fef3c7;
-  color: #b45309;
+  color: #000000;
 }
 .order-status.shipped {
   background: #151515;

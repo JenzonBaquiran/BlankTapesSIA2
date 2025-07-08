@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import Navbar from "./Navbar.jsx";
+import Navbar from "./navbar.jsx";
 import Footer from "./Footer.jsx";
 import './CustomerOrder.css';
 import { API_BASE } from "../config"

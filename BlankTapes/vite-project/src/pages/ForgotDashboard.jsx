@@ -4,7 +4,7 @@ import CheckBoxIcon from '@mui/icons-material/CheckBox'
 import DisabledByDefaultIcon from '@mui/icons-material/DisabledByDefault'
 import DeleteIcon from '@mui/icons-material/Delete'
 import { API_BASE } from "../config"
-import './ForgotDashboard.css' // <-- use this for styles
+import './ForgotDashboard.css'
 
 function ForgotDashboard() {
   const [requests, setRequests] = useState([])
