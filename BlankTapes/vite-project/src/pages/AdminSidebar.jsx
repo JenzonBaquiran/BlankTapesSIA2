@@ -5,6 +5,7 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import PersonIcon from '@mui/icons-material/Person';
 import InventoryIcon from '@mui/icons-material/Inventory';
+import PasswordIcon from '@mui/icons-material/Password';
 import { useState } from 'react';
 import { Modal, Box, Typography, Button } from '@mui/material';
 import logoWhite from "../img/logowhite.png"
@@ -38,6 +39,9 @@ function AdminSidebar() {
         </Link>
         <Link to="/manageorder">
           <ShoppingCartIcon /> ORDERS
+        </Link>
+        <Link to="/forgotdashboard">
+          <PasswordIcon /> REQUEST
         </Link>
         <div className="sidebar-link-logout" onClick={() => setOpenAddModalSidebarLogout(true)}>
           <LogoutIcon /> LOGOUT

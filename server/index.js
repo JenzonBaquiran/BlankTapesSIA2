@@ -4,6 +4,7 @@ const cors = require("cors");
 const path = require("path");
 const User = require("./models/user.model");
 const Product = require("./models/product");
+const ForgotRequest = require("./models/forgotRequest");
 const Order = require("./models/order");
 const bcrypt = require("bcryptjs");
 const fs = require("fs");
@@ -363,6 +364,101 @@ app.delete("/api/orders/:orderId", async (req, res) => {
   try {
     const order = await Order.findOneAndDelete({ orderId: req.params.orderId });
     if (!order) return res.status(404).json({ error: "Order not found." });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+
+// --- Password Reset Requests ---
+// Customer requests password reset
+app.post("/api/forgot-requests", async (req, res) => {
+  try {
+    const { username } = req.body;
+    const user = await User.findOne({ username });
+    if (!user) return res.status(404).json({ error: "User not found." });
+
+    // Prevent duplicate pending requests
+    const existing = await ForgotRequest.findOne({ username, status: "pending" });
+    if (existing) return res.json({ success: true, message: "Request already pending." });
+
+    const reqDoc = await ForgotRequest.create({
+      username,
+      email: user.email,
+      status: "pending"
+    });
+    res.json({ success: true, request: reqDoc });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// Admin: get all forgot requests
+app.get("/api/forgot-requests", async (req, res) => {
+  const requests = await ForgotRequest.find().sort({ requestedAt: -1 });
+  res.json(requests);
+});
+
+// Admin: approve request
+app.post("/api/forgot-requests/:id/approve", async (req, res) => {
+  const reqDoc = await ForgotRequest.findByIdAndUpdate(
+    req.params.id,
+    { status: "approved" },
+    { new: true }
+  );
+  if (!reqDoc) return res.status(404).json({ error: "Request not found." });
+  res.json({ success: true, request: reqDoc });
+});
+
+// Admin: decline request
+app.post("/api/forgot-requests/:id/decline", async (req, res) => {
+  const reqDoc = await ForgotRequest.findByIdAndUpdate(
+    req.params.id,
+    { status: "declined" },
+    { new: true }
+  );
+  if (!reqDoc) return res.status(404).json({ error: "Request not found." });
+  res.json({ success: true, request: reqDoc });
+});
+
+// Check forgot password request status for a username
+app.get("/api/forgot-requests/status/:username", async (req, res) => {
+  const reqDoc = await ForgotRequest.findOne({
+    username: req.params.username,
+    status: { $in: ["pending", "approved"] }
+  });
+  if (!reqDoc) return res.json({ status: "none" });
+  return res.json({ status: reqDoc.status });
+});
+
+// Customer: reset password (only if approved)
+app.post("/api/users/reset-password", async (req, res) => {
+  try {
+    const { username, newPassword } = req.body;
+    const reqDoc = await ForgotRequest.findOne({ username, status: "approved" });
+    if (!reqDoc) return res.json({ success: false, error: "Not approved by admin." });
+
+    const user = await User.findOne({ username });
+    if (!user) return res.json({ success: false, error: "User not found." });
+
+    user.password = await bcrypt.hash(newPassword, 10);
+    await user.save();
+
+    // Mark request as used
+    reqDoc.status = "used";
+    await reqDoc.save();
+
+    res.json({ success: true });
+  } catch (err) {
+    res.json({ success: false, error: err.message });
+  }
+});
+
+// Delete forgot password request
+app.delete("/api/forgot-requests/:id", async (req, res) => {
+  try {
+    await ForgotRequest.findByIdAndDelete(req.params.id);
     res.json({ success: true });
   } catch (err) {
     res.status(400).json({ error: err.message });

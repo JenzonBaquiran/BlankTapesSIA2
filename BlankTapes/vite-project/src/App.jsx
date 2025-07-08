@@ -14,6 +14,8 @@ import StaffManageOrder from "./pages/StaffManageOrder";
 import StaffSidebar from "./pages/StaffSidebar";
 import CustomerOrder from "./pages/CustomerOrder";
 import MyAccount from "./pages/MyAccount";
+import ForgotPassword from "./pages/ForgotPassword";
+import ForgotDashboard from "./pages/ForgotDashboard";
 
 
 function App() {
@@ -34,6 +36,8 @@ function App() {
       <Route path="/staffsidebar" element={<StaffSidebar />} />
       <Route path="/customerorder" element={<CustomerOrder />} />
       <Route path="/myaccount" element={<MyAccount />} />
+      <Route path="/forgotpassword" element={<ForgotPassword />} />
+      <Route path="/forgotdashboard" element={<ForgotDashboard />} />
 
       </Routes>
     </BrowserRouter>

@@ -71,7 +71,12 @@ function Login() {
             />
             {error && <div style={{ color: "red", marginBottom: 8 }}>{error}</div>}
             <div className="login-links">
-              <Button className="login-link" variant="text" fullWidth={false}>
+              <Button
+                className="login-link"
+                variant="text"
+                fullWidth={false}
+                onClick={() => navigate("/forgotpassword")}
+              >
                 FORGOT YOUR PASSWORD?
               </Button>
               <Button
