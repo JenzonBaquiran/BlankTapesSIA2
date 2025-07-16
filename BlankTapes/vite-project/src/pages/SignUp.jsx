@@ -12,13 +12,31 @@ function SignUp() {
   const [confirmPassword, setConfirmPassword] = useState("")
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
+  const [passwordStrength, setPasswordStrength] = useState("")
   const navigate = useNavigate()
+
+  function checkPasswordStrength(pw) {
+    if (pw.length < 6) return "Weak"
+    if (pw.match(/[A-Z]/) && pw.match(/[0-9]/) && pw.match(/[^A-Za-z0-9]/)) return "Strong"
+    if (pw.match(/[A-Z]/) && pw.match(/[0-9]/)) return "Medium"
+    return "Weak"
+  }
+
+  const handlePasswordChange = (e) => {
+    const pw = e.target.value
+    setPassword(pw)
+    setPasswordStrength(checkPasswordStrength(pw))
+  }
 
   const handleSignUp = async () => {
     setError("")
     setSuccess("")
     if (password !== confirmPassword) {
       setError("Passwords do not match.")
+      return
+    }
+    if (passwordStrength === "Weak") {
+      setError("Please enter a stronger password (Medium or Strong).")
       return
     }
     try {
@@ -76,13 +94,27 @@ function SignUp() {
               placeholder="PASSWORD"
               type="password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={handlePasswordChange}
               fullWidth
               className="login-input"
               InputProps={{
                 classes: { notchedOutline: "input-outline" },
               }}
             />
+            {password.length > 0 && (
+              <div
+                style={{
+                  marginTop: 4,
+                  fontSize: 13,
+                  color: "#fff", // straight white
+                  padding: "2px 10px",
+                  borderRadius: 8,
+                  width: "fit-content",
+                }}
+              >
+                Password strength: {passwordStrength}
+              </div>
+            )}
             <TextField
               variant="outlined"
               placeholder="CONFIRM PASSWORD"

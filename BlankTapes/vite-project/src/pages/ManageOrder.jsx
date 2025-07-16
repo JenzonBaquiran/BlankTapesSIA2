@@ -102,6 +102,7 @@ function ManageOrder() {
                 <th>Items</th>
                 <th>Total</th>
                 <th>Status</th>
+                <th>Payment</th>
                 <th>Date</th>
                 <th>Actions</th>
               </tr>
@@ -120,10 +121,16 @@ function ManageOrder() {
                   <td>₱{getOrderTotal(order.items || []).toLocaleString()}</td>
                   <td>
                     <span
-                      className="status-badge"
-                  
+                      className={`status-badge ${((order.status || '').toLowerCase())}`}
                     >
                       {(order.status || '').toUpperCase()}
+                    </span>
+                  </td>
+                  <td>
+                    <span
+                      className={`payment-badge ${order.paid ? 'paid' : 'unpaid'}`}
+                    >
+                      {order.paid ? 'PAID' : 'UNPAID'}
                     </span>
                   </td>
                   <td>{order.date ? (new Date(order.date).toLocaleDateString()) : ''}</td>

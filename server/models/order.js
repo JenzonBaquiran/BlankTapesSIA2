@@ -14,7 +14,7 @@ const OrderSchema = new mongoose.Schema(
         quantity: { type: Number, required: true },
         price: { type: Number, required: true },
         img: { type: String } ,
-         size: { type: String }
+        size: { type: String }
       }
     ],
     total: { type: Number, required: true },
@@ -24,7 +24,8 @@ const OrderSchema = new mongoose.Schema(
       default: 'PENDING', 
       uppercase: true 
     },
-    date: { type: Date, default: Date.now }
+    date: { type: Date, default: Date.now },
+    paid: { type: Boolean, default: false }
   },
   { collection: 'order-data' }
 );

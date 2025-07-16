@@ -4,7 +4,6 @@ import Navbar from "./Navbar.jsx";
 import Footer from "./Footer.jsx";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import InventoryIcon from "@mui/icons-material/Inventory";
-import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import { API_BASE } from "../config"
 
 const statusColors = {
@@ -109,13 +108,6 @@ export default function MyAccount() {
           </div>
           <div className="summary-value">{totalCheckedOutItems}</div>
           <div className="summary-label">Products Checked Out</div>
-        </div>
-        <div className="summary-card">
-          <div className="summary-icon">
-            <AttachMoneyIcon fontSize="inherit" />
-          </div>
-          <div className="summary-value">{totalBalance}</div>
-          <div className="summary-label">Total Balance</div>
         </div>
       </div>
       <div className="dashboard-section">

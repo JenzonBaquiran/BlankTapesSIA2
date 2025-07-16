@@ -31,6 +31,7 @@ function StaffManageOrder() {
 
   // Fetch orders from backend
   useEffect(() => {
+
     fetch(`${API_BASE}/api/orders`) // <-- fixed endpoint
       .then(res => res.json())
       .then(data => setOrders(data))
@@ -103,6 +104,7 @@ function StaffManageOrder() {
                 <th>Items</th>
                 <th>Total</th>
                 <th>Status</th>
+                <th>Payment</th> {/* Added Payment column */}
                 <th>Date</th>
                 <th>Actions</th>
               </tr>
@@ -121,16 +123,16 @@ function StaffManageOrder() {
                   <td>₱{getOrderTotal(order.items || []).toLocaleString()}</td>
                   <td>
                     <span
-                      className="status-badge"
-                      style={{
-                        background: "#151515",
-                        color: "#fff",
-                        fontWeight: 600,
-                        borderRadius: 12,
-                        padding: "2px 14px",
-                      }}
+                      className={`status-badge ${((order.status || '').toLowerCase())}`}
                     >
                       {(order.status || '').toUpperCase()}
+                    </span>
+                  </td>
+                  <td>
+                    <span
+                      className={`payment-badge ${order.paid ? 'paid' : 'unpaid'}`}
+                    >
+                      {order.paid ? 'PAID' : 'UNPAID'}
                     </span>
                   </td>
                   <td>{order.date ? (new Date(order.date).toLocaleDateString()) : ''}</td>

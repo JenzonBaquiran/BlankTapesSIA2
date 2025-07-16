@@ -13,7 +13,21 @@ function ForgotPassword() {
   const [success, setSuccess] = useState("")
   const [status, setStatus] = useState("") // "none", "pending", "approved"
   const [loading, setLoading] = useState(false)
+  const [passwordStrength, setPasswordStrength] = useState("")
   const navigate = useNavigate()
+
+  function checkPasswordStrength(pw) {
+    if (pw.length < 6) return "Weak";
+    if (pw.match(/[A-Z]/) && pw.match(/[0-9]/) && pw.match(/[^A-Za-z0-9]/)) return "Strong";
+    if (pw.match(/[A-Z]/) && pw.match(/[0-9]/)) return "Medium";
+    return "Weak";
+  }
+
+  const handleNewPasswordChange = (e) => {
+    const pw = e.target.value;
+    setNewPassword(pw);
+    setPasswordStrength(checkPasswordStrength(pw));
+  };
 
   // Polling for approval if pending
   useEffect(() => {
@@ -118,7 +132,6 @@ function ForgotPassword() {
             <div className="logo-container">
               <img src={logoWhite || "/placeholder.svg"} alt="BLANKTAPES" className="brand-logo" />
             </div>
-            <h2 style={{ color: "#fff", textAlign: "center", marginBottom: 10 }}>Forgot Password</h2>
             <TextField
               variant="outlined"
               placeholder="USERNAME"
@@ -154,7 +167,7 @@ function ForgotPassword() {
                   placeholder="NEW PASSWORD"
                   type="password"
                   value={newPassword}
-                  onChange={e => setNewPassword(e.target.value)}
+                  onChange={handleNewPasswordChange}
                   fullWidth
                   className="login-input"
                   InputProps={{
@@ -162,6 +175,20 @@ function ForgotPassword() {
                   }}
                   style={{ marginTop: 16 }}
                 />
+                {newPassword.length > 0 && (
+                  <div
+                    style={{
+                      marginTop: 4,
+                      fontSize: 13,
+                      color: "#fff",
+                      padding: "2px 10px",
+                      borderRadius: 8,
+                      width: "fit-content",
+                    }}
+                  >
+                    Password strength: {passwordStrength}
+                  </div>
+                )}
                 <TextField
                   variant="outlined"
                   placeholder="CONFIRM PASSWORD"

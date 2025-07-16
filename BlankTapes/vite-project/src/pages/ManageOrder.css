@@ -134,6 +134,22 @@
   color: #fff;
 }
 
+/* Payment badge - green for paid, red for unpaid */
+.payment-badge {
+  display: inline-block;
+  padding: 4px 18px;
+  border-radius: 16px;
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: #fff;
+  background: #151515;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: none;
+  border: none;
+}
+
+
 /* Actions */
 .order-actions {
   display: flex;

@@ -19,16 +19,19 @@ function CustomerOrder() {
   const [showDetails, setShowDetails] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState("All Orders");
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [showPayModal, setShowPayModal] = useState(false);
+  const [accountNumber, setAccountNumber] = useState("");
+  const [accountName, setAccountName] = useState("");
+  const [bankName, setBankName] = useState("");
 
   // Fetch orders for logged-in customer
   useEffect(() => {
     const username = localStorage.getItem("username");
     if (!username) return;
-    const API_URL = `${API_BASE}/api/orders/customer/${username}`; // <-- add /api
+    const API_URL = `${API_BASE}/api/orders/customer/${username}`;
     fetch(API_URL)
       .then(res => res.json())
       .then(data => {
-        // Map backend orders to UI format
         setOrders(
           (data || []).map(order => ({
             id: order.orderId || order._id,
@@ -43,6 +46,7 @@ function CustomerOrder() {
                 : order.items[0].img
               : "https://i.imgur.com/2nCt3Sbl.jpg",
             details: order.items || [],
+            paid: order.paid || false, // <-- Add paid info from backend (default false)
             raw: order
           }))
         );
@@ -96,6 +100,9 @@ function CustomerOrder() {
                 <div className="order-summary-date">
                   {order.date} &nbsp; <span role="img" aria-label="item">📦</span> {order.items} item{order.items > 1 ? "s" : ""}
                 </div>
+                <div className={`order-paid-status ${order.paid ? "paid" : "unpaid"}`}>
+                  {order.paid ? "Paid" : "Unpaid"}
+                </div>
               </div>
               <span
                 className={`order-status ${order.status === "Cancelled" ? "cancelled" : "shipped"}`}
@@ -145,6 +152,7 @@ function CustomerOrder() {
           <div>
             <h2>Order {selectedOrder.id}</h2>
             <span className="order-date">Placed on {selectedOrder.date}</span>
+            {/* Removed paid/unpaid info here */}
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
             <span className={`order-status ${selectedOrder.status === "Cancelled" ? "cancelled" : "shipped"}`}>{selectedOrder.status}</span>
@@ -202,6 +210,12 @@ function CustomerOrder() {
               <div>
                 <div>Tracking Number: <strong>{selectedOrder.tracking}</strong></div>
                 <div>Estimated Delivery: <strong>{selectedOrder.date}</strong></div>
+                <div>
+                  Payment Status:{" "}
+                  <span className={`order-paid-status ${selectedOrder.paid ? "paid" : "unpaid"}`}>
+                    {selectedOrder.paid ? "Paid" : "Unpaid"}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -210,7 +224,7 @@ function CustomerOrder() {
           <div className="pay-btn-container">
             <button
               className="pay-btn"
-              onClick={() => alert('Payment functionality coming soon!')}
+              onClick={() => setShowPayModal(true)}
             >
               Pay Now
             </button>
@@ -223,6 +237,59 @@ function CustomerOrder() {
           </div>
         )}
       </div>
+      {/* Payment Modal */}
+      {showPayModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <button
+              className="modal-close-btn"
+              onClick={() => setShowPayModal(false)}
+              aria-label="Close"
+            >
+              ×
+            </button>
+            <h3>Payment Details</h3>
+            <div className="modal-fields">
+              <label>Account Number</label>
+              <input
+                type="text"
+                value={accountNumber}
+                onChange={e => setAccountNumber(e.target.value)}
+                className="modal-input"
+                placeholder="Enter account number"
+              />
+              <label>Account Name</label>
+              <input
+                type="text"
+                value={accountName}
+                onChange={e => setAccountName(e.target.value)}
+                className="modal-input"
+                placeholder="Enter account name"
+              />
+              <label>Bank Name</label>
+              <input
+                type="text"
+                value={bankName}
+                onChange={e => setBankName(e.target.value)}
+                className="modal-input"
+                placeholder="Enter bank name"
+              />
+            </div>
+            <button
+              className="modal-submit-btn"
+              onClick={() => {
+                setShowPayModal(false);
+                setAccountNumber("");
+                setAccountName("");
+                setBankName("");
+                alert("Payment details submitted!");
+              }}
+            >
+              Submit Payment
+            </button>
+          </div>
+        </div>
+      )}
       <Footer />
     </div>
   );
