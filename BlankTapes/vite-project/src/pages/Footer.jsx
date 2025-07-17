@@ -1,8 +1,10 @@
 import React from "react";
-import FacebookIcon from "@mui/icons-material/Facebook";
-import InstagramIcon from "@mui/icons-material/Instagram";
-import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
 import "./Footer.css";
+
+import SevenElevenLogo from "../assets/7ELEBEN.png";
+import BankLogo from "../assets/BPI.png";
+import KahitSaanLogo from "../assets/KAHIT SAAN.png";
+import CustomLogo from "../assets/ROST.png";
 
 const Footer = () => (
   <footer className="footer">
@@ -12,9 +14,38 @@ const Footer = () => (
       <button className="footer-arrow">&#8594;</button>
     </div>
     <div className="footer-right">
-      <a href="#" className="footer-icon"><FacebookIcon /></a>
-      <a href="#" className="footer-icon"><InstagramIcon /></a>
-      <a href="#" className="footer-icon"><EmailOutlinedIcon /></a>
+      <a
+        href="http://192.168.9.63:5173"
+        className="footer-icon"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <img src={SevenElevenLogo} alt="7 Eleven" style={{ height: 20 }} />
+      </a>
+      <a
+        href="http://192.168.8.201:5173/login"
+        className="footer-icon"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <img src={BankLogo} alt="Bank" style={{ height: 20 }} />
+      </a>
+      <a
+        href="http://192.168.9.69:5173"
+        className="footer-icon"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <img src={KahitSaanLogo} alt="Kahit Saan" style={{ height: 20 }} />
+      </a>
+      <a
+        href="http://192.168.9.45:5173"
+        className="footer-icon"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <img src={CustomLogo} alt="Custom" style={{ height: 20 }} />
+      </a>
     </div>
   </footer>
 );
