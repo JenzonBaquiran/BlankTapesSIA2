@@ -22,7 +22,11 @@ function CustomerOrder() {
   const [showPayModal, setShowPayModal] = useState(false);
   const [accountNumber, setAccountNumber] = useState("");
   const [accountName, setAccountName] = useState("");
-  const [bankName, setBankName] = useState("");
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const BANK_API_BASE = "http://192.168.8.201:5000/api";
+  const ADMIN_ACCOUNT_NUMBER = "229548608885";
+  const [customerBankInfo, setCustomerBankInfo] = useState(null);
+  const [bankFetchError, setBankFetchError] = useState("");
 
   // Fetch orders for logged-in customer
   useEffect(() => {
@@ -59,7 +63,7 @@ function CustomerOrder() {
 
   const handleCancelOrder = async () => {
     // Update status in backend
-    await fetch(`${API_BASE}/api/orders/${selectedOrder.id}`, { // <-- add /api
+    await fetch(`${API_BASE}/api/orders/${selectedOrder.id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status: 'Cancelled' }),
@@ -74,6 +78,82 @@ function CustomerOrder() {
     setSelectedOrder(prev =>
       prev ? { ...prev, status: 'Cancelled' } : prev
     );
+  };
+
+  // Fetch customer info when account number changes
+  useEffect(() => {
+    if (!accountNumber || accountNumber.length < 6) {
+      setCustomerBankInfo(null);
+      setBankFetchError("");
+      return;
+    }
+    fetch(`${BANK_API_BASE}/users`)
+      .then(res => res.json())
+      .then(users => {
+        const found = users.find(u => u.accountNumber === accountNumber);
+        if (found) {
+          setCustomerBankInfo(found);
+          setAccountName(found.name || "");
+          setBankFetchError("");
+        } else {
+          setCustomerBankInfo(null);
+          setBankFetchError("Account not found.");
+        }
+      })
+      .catch(() => setBankFetchError("Bank connection error."));
+  }, [accountNumber]);
+
+  // Payment handler
+  const handleBankPayment = async () => {
+    setBankFetchError("");
+    if (!customerBankInfo) {
+      setBankFetchError("Please enter a valid account number.");
+      return;
+    }
+    const amount = Number(
+      (selectedOrder.price || "0")
+        .replace(/[^\d.]/g, "")
+    );
+    try {
+      const res = await fetch(`${BANK_API_BASE}/users/transfer`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fromUserId: customerBankInfo._id || customerBankInfo.id,
+          toAccountNumber: ADMIN_ACCOUNT_NUMBER,
+          amount,
+          description: `Order payment for ${selectedOrder.id}`,
+        }),
+      });
+      const data = await res.json();
+      if (
+        data.success ||
+        data.status === "ok" ||
+        data.transactionId ||
+        data.amountDeducted ||
+        (data.message && data.message.toLowerCase().includes("success"))
+      ) {
+        setShowPayModal(false);
+        setShowSuccessModal(true);
+        await fetch(`${API_BASE}/api/orders/${selectedOrder.id}/pay`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ paid: true }),
+        });
+        setOrders(prevOrders =>
+          prevOrders.map(order =>
+            order.id === selectedOrder.id ? { ...order, paid: true } : order
+          )
+        );
+        setSelectedOrder(prev =>
+          prev ? { ...prev, paid: true } : prev
+        );
+      } else {
+        setBankFetchError(data.error || "Payment failed.");
+      }
+    } catch {
+      setBankFetchError("Bank connection error.");
+    }
   };
 
   const orderSummary = (
@@ -152,7 +232,6 @@ function CustomerOrder() {
           <div>
             <h2>Order {selectedOrder.id}</h2>
             <span className="order-date">Placed on {selectedOrder.date}</span>
-            {/* Removed paid/unpaid info here */}
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
             <span className={`order-status ${selectedOrder.status === "Cancelled" ? "cancelled" : "shipped"}`}>{selectedOrder.status}</span>
@@ -225,12 +304,14 @@ function CustomerOrder() {
             <button
               className="pay-btn"
               onClick={() => setShowPayModal(true)}
+              disabled={selectedOrder.paid}
             >
               Pay Now
             </button>
             <button
               className="cancel-order-btn"
               onClick={handleCancelOrder}
+              disabled={selectedOrder.paid}
             >
               Cancel Order
             </button>
@@ -258,34 +339,42 @@ function CustomerOrder() {
                 className="modal-input"
                 placeholder="Enter account number"
               />
-              <label>Account Name</label>
-              <input
-                type="text"
-                value={accountName}
-                onChange={e => setAccountName(e.target.value)}
-                className="modal-input"
-                placeholder="Enter account name"
-              />
-              <label>Bank Name</label>
-              <input
-                type="text"
-                value={bankName}
-                onChange={e => setBankName(e.target.value)}
-                className="modal-input"
-                placeholder="Enter bank name"
-              />
+              {bankFetchError && (
+                <div style={{ color: "red", fontSize: 13, marginBottom: 4 }}>{bankFetchError}</div>
+              )}
+              {customerBankInfo && (
+                <>
+                  <label>Account Name</label>
+                  <input
+                    type="text"
+                    value={customerBankInfo.name}
+                    className="modal-input"
+                    disabled
+                  />
+                </>
+              )}
             </div>
             <button
               className="modal-submit-btn"
-              onClick={() => {
-                setShowPayModal(false);
-                setAccountNumber("");
-                setAccountName("");
-                setBankName("");
-                alert("Payment details submitted!");
-              }}
+              onClick={handleBankPayment}
+              disabled={!customerBankInfo}
             >
               Submit Payment
+            </button>
+          </div>
+        </div>
+      )}
+      {showSuccessModal && (
+        <div className="modal-overlay">
+          <div className="modal-content" style={{ textAlign: "center" }}>
+            <h2 style={{ marginBottom: 16 }}>Payment Successful!</h2>
+            <p>Your payment has been processed and your order is now marked as paid.</p>
+            <button
+              className="modal-submit-btn"
+              style={{ marginTop: 24 }}
+              onClick={() => setShowSuccessModal(false)}
+            >
+              Close
             </button>
           </div>
         </div>

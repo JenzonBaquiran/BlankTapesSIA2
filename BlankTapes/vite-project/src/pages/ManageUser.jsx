@@ -76,7 +76,7 @@ function ManageUser() {
         setFormError(data.error || "Failed to add user.");
       }
     } else if (modalMode === 'edit') {
-      const res = await fetch(`${API_BASE}/api/users/${form._id}`, { // PUT update user
+      const res = await fetch(`${API_BASE}/api/users/${form.id}`, { // <-- use form.id
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),

@@ -359,6 +359,21 @@ app.put("/api/orders/:orderId", async (req, res) => {
   }
 });
 
+// Mark order as paid
+app.put("/api/orders/:orderId/pay", async (req, res) => {
+  try {
+    const order = await Order.findOneAndUpdate(
+      { orderId: req.params.orderId },
+      { paid: true },
+      { new: true }
+    );
+    if (!order) return res.status(404).json({ error: "Order not found." });
+    res.json({ success: true, order });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
 // Delete order
 app.delete("/api/orders/:orderId", async (req, res) => {
   try {
@@ -367,6 +382,17 @@ app.delete("/api/orders/:orderId", async (req, res) => {
     res.json({ success: true });
   } catch (err) {
     res.status(400).json({ error: err.message });
+  }
+});
+
+// Get total amount paid for orders
+app.get("/api/orders/amount-paid", async (req, res) => {
+  try {
+    const orders = await Order.find({ paid: true });
+    const amountPaid = orders.reduce((sum, order) => sum + (order.total || 0), 0);
+    res.json({ amountPaid });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 });
 

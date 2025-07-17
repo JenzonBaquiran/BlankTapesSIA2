@@ -26,7 +26,6 @@ export default function MyAccount() {
     // Fetch user details based on username in localStorage
     const username = localStorage.getItem("username");
     if (!username) return;
-
     const API_URL = `${API_BASE}/api/users/${username}`; // <-- correct endpoint
     const ORDERS_URL = `${API_BASE}/api/orders/customer/${username}`; // <-- correct endpoint
 
@@ -128,6 +127,7 @@ export default function MyAccount() {
             <tr>
               <th>Order ID</th>
               <th>Total</th>
+              <th>Payment</th>
               <th>Status</th>
               <th>Date</th>
             </tr>
@@ -137,6 +137,11 @@ export default function MyAccount() {
               <tr key={order.orderId || order._id}>
                 <td>{order.orderId || order._id}</td>
                 <td>₱{(order.total || 0).toLocaleString()}</td>
+                <td>
+                  <span className={`payment-badge ${order.paid ? "paid" : "unpaid"}`}>
+                    {order.paid ? "PAID" : "UNPAID"}
+                  </span>
+                </td>
                 <td>
                   <span
                     className="status-badge"
@@ -163,7 +168,7 @@ export default function MyAccount() {
             {recentOrders.length === 0 && (
               <tr>
                 <td
-                  colSpan={4}
+                  colSpan={5}
                   style={{ textAlign: "center", color: "#888" }}
                 >
                   No recent orders.

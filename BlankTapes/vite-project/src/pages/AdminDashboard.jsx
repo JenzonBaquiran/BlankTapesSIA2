@@ -13,26 +13,27 @@ function AdminDashboard() {
   const [totalOrders, setTotalOrders] = useState(0);
   const [recentOrders, setRecentOrders] = useState([]);
   const [totalRevenue, setTotalRevenue] = useState(0);
+  const [amountPaid, setAmountPaid] = useState(0);
 
   useEffect(() => {
-    fetch(`${API_BASE}/api/users`) // <-- fixed endpoint
+    fetch(`${API_BASE}/api/users`)
       .then(res => res.json())
       .then(data => setTotalUsers(data.length))
       .catch(() => setTotalUsers(0));
 
-    fetch(`${API_BASE}/api/products`) // <-- fixed endpoint
+    fetch(`${API_BASE}/api/products`)
       .then(res => res.json())
       .then(data => setTotalProducts(data.length))
       .catch(() => setTotalProducts(0));
 
-    fetch(`${API_BASE}/api/orders`) // <-- fixed endpoint
+    fetch(`${API_BASE}/api/orders`)
       .then(res => res.json())
       .then(data => {
         setTotalOrders(data.length);
-        setRecentOrders(data.slice(0, 3)); // latest 3 orders
-        // Calculate total revenue from delivered orders
+        setRecentOrders(data.slice(0, 3));
+        // Total revenue: sum of all paid orders
         const revenue = data
-          .filter(order => order.status === "DELIVERED")
+          .filter(order => order.paid)
           .reduce((sum, order) => sum + (order.total || 0), 0);
         setTotalRevenue(revenue);
       })
@@ -41,6 +42,12 @@ function AdminDashboard() {
         setRecentOrders([]);
         setTotalRevenue(0);
       });
+
+    // Fetch amount paid from backend (optional, can be removed if not needed)
+    fetch(`${API_BASE}/api/orders/amount-paid`)
+      .then(res => res.json())
+      .then(data => setAmountPaid(data.amountPaid || 0))
+      .catch(() => setAmountPaid(0));
   }, []);
 
   return (
@@ -87,6 +94,7 @@ function AdminDashboard() {
                   <th>Order ID</th>
                   <th>Customer</th>
                   <th>Total</th>
+                  <th>Payment</th>
                   <th>Status</th>
                   <th>Date</th>
                 </tr>
@@ -98,6 +106,11 @@ function AdminDashboard() {
                     <td>{order.customer?.name}</td>
                     <td>₱{(order.total || 0).toLocaleString()}</td>
                     <td>
+                      <span className={`payment-badge ${order.paid ? "paid" : "unpaid"}`}>
+                        {order.paid ? "PAID" : "UNPAID"}
+                      </span>
+                    </td>
+                    <td>
                       <span className={`status ${order.status?.toLowerCase()}`}>{order.status}</span>
                     </td>
                     <td>{order.date ? new Date(order.date).toLocaleDateString() : ""}</td>
@@ -105,7 +118,7 @@ function AdminDashboard() {
                 ))}
                 {recentOrders.length === 0 && (
                   <tr>
-                    <td colSpan={5} style={{ textAlign: "center", color: "#888" }}>No recent orders.</td>
+                    <td colSpan={6} style={{ textAlign: "center", color: "#888" }}>No recent orders.</td>
                   </tr>
                 )}
               </tbody>

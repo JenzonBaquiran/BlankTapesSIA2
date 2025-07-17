@@ -31,9 +31,14 @@ function ManageOrder() {
 
   // Fetch orders from backend
   useEffect(() => {
-    fetch(`${API_BASE}/api/orders`) // <-- fixed endpoint
+    fetch(`${API_BASE}/api/orders`)
       .then(res => res.json())
-      .then(data => setOrders(data))
+      .then(data => setOrders(
+        (data || []).map(order => ({
+          ...order,
+          paid: order.paid || false // Ensure paid status is included
+        }))
+      ))
       .catch(() => setOrders([]));
   }, []);
 
