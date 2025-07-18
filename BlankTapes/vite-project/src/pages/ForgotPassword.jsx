@@ -29,10 +29,10 @@ function ForgotPassword() {
     setPasswordStrength(checkPasswordStrength(pw));
   };
 
-  // Polling for approval if pending
+  // Real-time polling for request status (approved/declined)
   useEffect(() => {
     let interval;
-    if (status === "pending" && username) {
+    if (username && status !== "approved") {
       interval = setInterval(async () => {
         const reqRes = await fetch(`${API_BASE}/api/forgot-requests/status/${username}`);
         const reqData = await reqRes.json();
@@ -40,9 +40,16 @@ function ForgotPassword() {
           setStatus("approved");
           setSuccess("Request approved! Please enter your new password.");
           setError("");
-          clearInterval(interval);
+        } else if (reqData.status === "declined") {
+          setStatus("declined");
+          setError("Admin declined forgot password request.");
+          setSuccess("");
+        } else if (reqData.status === "pending") {
+          setStatus("pending");
+          setSuccess("Request is not yet approved. Please wait for admin approval.");
+          setError("");
         }
-      }, 2000); // Poll every 2 seconds
+      }, 500); // Poll every 0.5 seconds
     }
     return () => clearInterval(interval);
   }, [status, username, API_BASE]);
@@ -73,6 +80,9 @@ function ForgotPassword() {
     } else if (reqData.status === "approved") {
       setStatus("approved")
       setSuccess("Request approved! Please enter your new password.")
+    } else if (reqData.status === "declined") {
+      setStatus("declined")
+      setError("Admin declined forgot password request.")
     } else {
       // No request, create one
       await fetch(`${API_BASE}/api/forgot-requests`, {
@@ -144,8 +154,17 @@ function ForgotPassword() {
               }}
               disabled={status === "approved"}
             />
-            {error && <div style={{ color: "red", marginBottom: 8 }}>{error}</div>}
+            {/* Only show error if not declined, otherwise show declined message below */}
+            {error && status !== "declined" && (
+              <div style={{ color: "red", marginBottom: 8 }}>{error}</div>
+            )}
             {success && <div style={{ color: "lightgreen", marginBottom: 8 }}>{success}</div>}
+            {/* Show declined message only once */}
+            {status === "declined" && (
+              <div style={{ color: "red", marginBottom: 8 }}>
+                Admin declined forgot password request.
+              </div>
+            )}
             {/* Show check/request button if not approved */}
             {status !== "approved" && (
               <Button
@@ -214,6 +233,7 @@ function ForgotPassword() {
                 </Button>
               </>
             )}
+        
             <div className="login-links">
               <Button
                 className="login-link"

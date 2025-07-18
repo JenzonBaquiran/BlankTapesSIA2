@@ -5,6 +5,7 @@ import SevenElevenLogo from "../assets/7ELEBEN.png";
 import BankLogo from "../assets/BPI.png";
 import KahitSaanLogo from "../assets/KAHIT SAAN.png";
 import CustomLogo from "../assets/ROST.png";
+import SinilikhaLogo from "../assets/SINILIKHA.png"; // <-- Add this import
 
 const Footer = () => (
   <footer className="footer">
@@ -45,6 +46,14 @@ const Footer = () => (
         rel="noopener noreferrer"
       >
         <img src={CustomLogo} alt="Custom" style={{ height: 20 }} />
+      </a>
+      <a
+        href="http://192.168.9.48:5173"
+        className="footer-icon"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <img src={SinilikhaLogo} alt="Sinilikha" style={{ height: 20 }} />
       </a>
     </div>
   </footer>

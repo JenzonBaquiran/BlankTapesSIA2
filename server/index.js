@@ -452,7 +452,7 @@ app.post("/api/forgot-requests/:id/decline", async (req, res) => {
 app.get("/api/forgot-requests/status/:username", async (req, res) => {
   const reqDoc = await ForgotRequest.findOne({
     username: req.params.username,
-    status: { $in: ["pending", "approved"] }
+    status: { $in: ["pending", "approved", "declined"] }
   });
   if (!reqDoc) return res.json({ status: "none" });
   return res.json({ status: reqDoc.status });

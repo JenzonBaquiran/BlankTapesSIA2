@@ -1,5 +1,6 @@
 import { useState } from "react"
-import { TextField, Button } from "@mui/material"
+import { TextField, Button, IconButton, InputAdornment } from "@mui/material"
+import { Visibility, VisibilityOff } from "@mui/icons-material"
 import { useNavigate } from "react-router-dom"
 import "./Login.css"
 import logoWhite from "../img/logowhite.png"
@@ -8,6 +9,7 @@ import { API_BASE } from "../config"
 function Login() {
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
+  const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState("")
   const navigate = useNavigate()
 
@@ -60,13 +62,24 @@ function Login() {
             <TextField
               variant="outlined"
               placeholder="PASSWORD"
-              type="password"
+              type={showPassword ? "text" : "password"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               fullWidth
               className="login-input"
               InputProps={{
                 classes: { notchedOutline: "input-outline" },
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label="toggle password visibility"
+                      onClick={() => setShowPassword((show) => !show)}  
+                      edge="end"
+                    >
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
               }}
             />
             {error && <div style={{ color: "red", marginBottom: 8 }}>{error}</div>}
