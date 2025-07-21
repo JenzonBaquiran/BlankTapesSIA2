@@ -23,6 +23,7 @@ function CustomerOrder() {
   const [accountNumber, setAccountNumber] = useState("");
   const [accountName, setAccountName] = useState("");
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showBankDisabledModal, setShowBankDisabledModal] = useState(false);
   const BANK_API_BASE = "http://192.168.8.201:5000/api";
   const ADMIN_ACCOUNT_NUMBER = "229548608885";
   const [customerBankInfo, setCustomerBankInfo] = useState(null);
@@ -85,6 +86,7 @@ function CustomerOrder() {
     if (!accountNumber || accountNumber.length < 6) {
       setCustomerBankInfo(null);
       setBankFetchError("");
+      setShowBankDisabledModal(false);
       return;
     }
     fetch(`${BANK_API_BASE}/users`)
@@ -95,12 +97,22 @@ function CustomerOrder() {
           setCustomerBankInfo(found);
           setAccountName(found.name || "");
           setBankFetchError("");
+          // Check if bank account is disabled
+          if (found.status && found.status.toLowerCase() === "disabled") {
+            setShowBankDisabledModal(true);
+          } else {
+            setShowBankDisabledModal(false);
+          }
         } else {
           setCustomerBankInfo(null);
           setBankFetchError("Account not found.");
+          setShowBankDisabledModal(false);
         }
       })
-      .catch(() => setBankFetchError("Bank connection error."));
+      .catch(() => {
+        setBankFetchError("Bank connection error.");
+        setShowBankDisabledModal(false);
+      });
   }, [accountNumber]);
 
   // Payment handler
@@ -357,9 +369,25 @@ function CustomerOrder() {
             <button
               className="modal-submit-btn"
               onClick={handleBankPayment}
-              disabled={!customerBankInfo}
+              disabled={!customerBankInfo || showBankDisabledModal}
             >
               Submit Payment
+            </button>
+          </div>
+        </div>
+      )}
+      {/* Bank Disabled Modal */}
+      {showBankDisabledModal && (
+        <div className="modal-overlay">
+          <div className="modal-content" style={{ textAlign: "center" }}>
+            <h2 style={{ color: "red", marginBottom: 16 }}>Bank Account Disabled</h2>
+            <p>Your bank account is disabled. Please contact your bank for assistance.</p>
+            <button
+              className="modal-submit-btn"
+              style={{ marginTop: 24 }}
+              onClick={() => setShowBankDisabledModal(false)}
+            >
+              Close
             </button>
           </div>
         </div>
