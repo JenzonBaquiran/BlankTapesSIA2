@@ -40,7 +40,7 @@ const Footer = () => (
         <img src={KahitSaanLogo} alt="Kahit Saan" style={{ height: 20 }} />
       </a>
       <a
-        href="http://192.168.9.45:5173"
+        href="http://192.168.9.207:5173"
         className="footer-icon"
         target="_blank"
         rel="noopener noreferrer"

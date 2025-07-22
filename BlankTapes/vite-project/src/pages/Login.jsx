@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { TextField, Button, IconButton, InputAdornment } from "@mui/material"
+import { TextField, Button, IconButton, InputAdornment, CircularProgress } from "@mui/material"
 import { Visibility, VisibilityOff } from "@mui/icons-material"
 import { useNavigate } from "react-router-dom"
 import "./Login.css"
@@ -11,10 +11,12 @@ function Login() {
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState("")
+  const [loading, setLoading] = useState(false) // <-- Add loading state
   const navigate = useNavigate()
 
   const handleLogin = async () => {
     setError("")
+    setLoading(true)
     try {
       const res = await fetch(`${API_BASE}/api/login`, {
         method: "POST",
@@ -22,12 +24,16 @@ function Login() {
         body: JSON.stringify({ username, password }),
       })
       const data = await res.json()
+      // Prolong loading for 1.5 seconds
+      await new Promise(resolve => setTimeout(resolve, 1500))
       if (!data.success) {
         setError(data.error || "Login failed.")
+        setLoading(false)
         return
       }
       if (data.user.status && data.user.status.toLowerCase() === "inactive") {
         setError("Your account is inactive. Please contact support.")
+        setLoading(false)
         return
       }
       localStorage.setItem("username", data.user.username)
@@ -38,6 +44,7 @@ function Login() {
     } catch (err) {
       setError("Server error.")
     }
+    setLoading(false)
   }
 
   return (
@@ -58,6 +65,8 @@ function Login() {
               InputProps={{
                 classes: { notchedOutline: "input-outline" },
               }}
+              onKeyDown={e => { if (e.key === "Enter") handleLogin(); }}
+              disabled={loading} // <-- Disable while loading
             />
             <TextField
               variant="outlined"
@@ -75,13 +84,21 @@ function Login() {
                       aria-label="toggle password visibility"
                       onClick={() => setShowPassword((show) => !show)}  
                       edge="end"
+                      disabled={loading} // <-- Disable while loading
                     >
                       {showPassword ? <VisibilityOff /> : <Visibility />}
                     </IconButton>
                   </InputAdornment>
                 ),
               }}
+              onKeyDown={e => { if (e.key === "Enter") handleLogin(); }}
+              disabled={loading} // <-- Disable while loading
             />
+            {loading && (
+              <div style={{ display: "flex", justifyContent: "center", margin: "16px 0" }}>
+                <CircularProgress size={32} style={{ color: "#fff" }} />
+              </div>
+            )}
             {error && <div style={{ color: "red", marginBottom: 8 }}>{error}</div>}
             <div className="login-links">
               <Button
@@ -89,6 +106,7 @@ function Login() {
                 variant="text"
                 fullWidth={false}
                 onClick={() => navigate("/forgotpassword")}
+                disabled={loading} // <-- Disable while loading
               >
                 FORGOT YOUR PASSWORD?
               </Button>
@@ -97,12 +115,19 @@ function Login() {
                 variant="text"
                 fullWidth={false}
                 onClick={() => navigate("/signup")}
+                disabled={loading} // <-- Disable while loading
               >
                 NEW HERE? SIGN UP
               </Button>
             </div>
-            <Button variant="contained" className="login-btn" fullWidth onClick={handleLogin}>
-              LOGIN
+            <Button
+              variant="contained"
+              className="login-btn"
+              fullWidth
+              onClick={handleLogin}
+              disabled={loading} // <-- Disable while loading
+            >
+              {loading ? "Logging in..." : "LOGIN"}
             </Button>
           </div>
         </div>
